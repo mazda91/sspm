@@ -1,0 +1,3 @@
+1) understanding that we make the approximation that the growth rate is the same for the whole population at a given size
+2) defining priorities: man-machine interface ? models ?
+3) accepting the fact that I can't understand the whole project

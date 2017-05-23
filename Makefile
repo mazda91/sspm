@@ -10,7 +10,7 @@ TESTDIR = ./tests
 
 SRCFILES = $(wildcard $(SRCDIR)/*.cpp)
 INCFILES =  $(wildcard $(INCDIR)/*.hpp)
-OBJFILES = $(SRCFILES :.cpp=.o)
+OBJFILES=$(patsubst $(SRCDIR)/%.cpp, $(OBJDIR)/%.o, $(SRCFILES))
 EXEC = $(BINDIR)/main
 
 all: $(EXEC)
@@ -18,8 +18,10 @@ all: $(EXEC)
 $(EXEC) : $(OBJFILES)
 	$(GXX) $^ -o $@ 
 
-$(OBJDIR)/%.o :  $(SRCDIR)/%.cpp $(INCDIR)/%.hpp 
+$(OBJDIR)/%.o :  $(SRCDIR)/%.cpp $(OBJDIR) 
 	$(GXX) $(CFLAGS) $< -o $@
+
+$(OBJFILES): | $(OBJDIR)
 
 $(OBJDIR):
 	mkdir -p $(OBJDIR)

@@ -5,6 +5,7 @@
 #include <cassert>
 #include <map>
 #include <vector>
+#include "../include/model.hpp"
 
 // Transforms a string s into a vector of words (substrings not containing 
 // spaces)
@@ -34,7 +35,7 @@ void evaluate_command(std::string line){
     std::string model,method,parameter;
     double value;
     tokenize(line,command);
-    int i = 0;
+    unsigned int i = 0;
     while (i < command.size()){
         if (command[i] == "-model"){
             model = command[i+1];
@@ -50,7 +51,7 @@ void evaluate_command(std::string line){
         }else if (command[i] == "-cp"){ //to change a parameter of a model which must be provided before
             parameter = command[i+1];
             char str_value[command[i+2].size()];
-            for (int j=0; j<command[i+2].size();j++){ //converts a string in char* to use fonction atof
+            for (unsigned int j=0; j<command[i+2].size();j++){ //converts a string in char* to use fonction atof
                 str_value[j] = command[i+2][j];
             }
             value = atof(str_value);
