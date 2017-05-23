@@ -1,0 +1,2 @@
+1)tester l'IHM 
+2)tester qu'une modification de paramètre via cp modifie l'attribut ET l'élément de la liste correspondant

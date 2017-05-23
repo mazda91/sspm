@@ -2,15 +2,13 @@
 
 
 
+model::model(){;}
 
-
-
-
-model::model(std::string method){;}
+model::model(std::string method){this->method = method;}
 
 void model::setMethod(std::string method){ this->method = method;}
 
-model::~model(){;}
+model::~model(){}
 
 std::string model::getMethod(){ return method;}
 

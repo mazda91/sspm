@@ -13,32 +13,35 @@ struct parameter{
 };
 
 class model{
-    private:
-         std::vector<parameter> setParameters;
-         void defaultParameters();
-         std::string method;
-    protected:
-        virtual void individualGrowthRate() const = 0; 
-        virtual void individualMortalityRate() const = 0;
-        virtual void individualBirthRate() const = 0;
-        virtual void resourceDynamics() const = 0;
-    public:
-         model();
-         model(std::string method);
-         ~model();
+private:
+     std::vector<parameter> setParameters;
+     std::string method;
+    
+    
+    
+    
+    
+public:
+     model();
+     model(std::string method);
+     virtual ~model();
 
-        void setMethod(std::string method);
-        std::string getMethod();
+    virtual void defaultParameters() const =0;
+//    virtual void individualGrowthRate() const = 0;           
+//    virtual void individualMortalityRate() const = 0;
+//    virtual void individualBirthRate() const = 0;
+//    virtual void resourceDynamics() const = 0;           
+//    virtual void solve() const = 0;
 
-        void setParameter(std::string parameterName, double value);
-        parameter & getParameter(std::string parameterName);
-        
-        std::string getUnitParameter(std::string parameterName);
+    void setParameter(std::string parameterName, double value);
+    void setMethod(std::string method);
+    std::string getMethod();
+    parameter & getParameter(std::string parameterName);
+    
+    std::string getUnitParameter(std::string parameterName);
 
-        void addParameter(std::string parameterName, double value, std::string unit);
-        void addParameter(parameter Parameter);
-
-
+    void addParameter(std::string parameterName, double value, std::string unit);
+    void addParameter(parameter Parameter);
 };
 
 

@@ -23,7 +23,7 @@ void evaluate_command(std::string line){
     std::vector<std::string> command;
     std::string model,method,parameter;
     double value;
-    daphnia usedDaphnia;
+    daphnia *usedDaphnia = new daphnia();
     tokenize(line,command);
     unsigned int i = 0;
     while (i < command.size()){
@@ -51,6 +51,10 @@ void evaluate_command(std::string line){
             i += 3;
         }
     }
+    std::cout << "length at birth dans les attributs : " <<   usedDaphnia->lengthAtBirth << std::endl;
+    std::cout << "length at birth dans le vecteur de paramètres : " << usedDaphnia->getParameter("length at birth").value << std::endl;
+
+
 }
 
 
@@ -64,11 +68,23 @@ void evaluate_command(std::string line){
 
 int main() {
     std::string line;
-    while(true){
-        std::cout << ">" ;
-        getline(std::cin,line);
-        evaluate_command(line);
-    }
-        return 0;
+    std::cout << ">" ;
+    getline(std::cin,line);
+    evaluate_command(line);
+    
+    //---------------------------------------Test 1 : IHM -------------------------------------
+    //ligne de commande : -model daphnia -method FMU
+    //sortie attendue : coucou, tu es bien dans daphnia et la méthode est FMU
+    //ligne de commande : -model toto -method FMU
+    //sortie attendue : erreur car modèle inconnu
+    //ligne de commande : -model daphnia -method FMU -cd ok
+    //sortie attendue :erreur car option inconnue
+    //
+    //---------------------------------------Test 2------------------------------------
+    //ligne de commande : -cp length at birth 3.5
+    //sortie : length at birth dans les attributs : 3.5
+    //         length at birth dans le vecteur de paramètres : 3.5
+
+    return  0;
 }
 

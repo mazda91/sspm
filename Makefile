@@ -12,6 +12,7 @@ SRCFILES = $(wildcard $(SRCDIR)/*.cpp)
 INCFILES =  $(wildcard $(INCDIR)/*.hpp)
 OBJFILES=$(patsubst $(SRCDIR)/%.cpp, $(OBJDIR)/%.o, $(SRCFILES))
 EXEC = $(BINDIR)/main
+EXECTEST = $(TESTDIR)/test
 
 all: $(EXEC)
 
@@ -26,6 +27,12 @@ $(OBJFILES): | $(OBJDIR)
 $(OBJDIR):
 	mkdir -p $(OBJDIR)
 	mkdir -p $(BINDIR)
+
+test: $(EXECTEST)
+
+
+$(EXECTEST):	$(TESTDIR)/main.cpp
+	$(GXX) $(CFLAGS) $< -o $@
 
 clean:
 	rm -rf $(OBJDIR) $(BINDIR)
