@@ -12,9 +12,13 @@ model::~model(){}
 
 std::string model::getMethod(){ return method;}
 
+//in the vector of parameters
 void model::setParameter(std::string parameterName, double value){
     getParameter(parameterName).value = value;
 }
+
+
+void model::setAttribute(std::string attributeName, double value){}
 
 /*
  *@todo : Throwing exception here in case the parameter is not in the set
@@ -46,7 +50,19 @@ void model::addParameter(parameter Parameter){
     
 }
 
+void model::showParameter(std::string parameterName){
+    std::cout << "name";
+    for (unsigned int j=0; j < parameterName.size() - 4 ; j++){
+        std::cout << " ";
+    }            
+    std::cout << "value";
+    for (unsigned int j=0; j < std::to_string((this->getParameter(parameterName)).value).size() - 5 ; j++){
+        std::cout << " ";
+    }            
+    std::cout << "unit " << std::endl;
+    std::cout << parameterName << " " << this->getParameter(parameterName).value << " " << this->getParameter(parameterName).unit << std::endl;   
 
 
+} 
 
 

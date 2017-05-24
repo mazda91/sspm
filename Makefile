@@ -1,6 +1,7 @@
 GXX=g++
-CFLAGS= -c -g -Wall -Wextra -std=c++11
-
+CFLAGS= -c  -std=c++11
+WFLAGS= -Wall -Wextra
+LDFLAGS= -g
 
 SRCDIR = ./src
 OBJDIR = ./obj
@@ -20,7 +21,7 @@ $(EXEC) : $(OBJFILES)
 	$(GXX) $^ -o $@ 
 
 $(OBJDIR)/%.o :  $(SRCDIR)/%.cpp $(OBJDIR) 
-	$(GXX) $(CFLAGS) $< -o $@
+	$(GXX) $(CFLAGS) $(LDFLAGS) $(WFLAGS) $< -o $@
 
 $(OBJFILES): | $(OBJDIR)
 
@@ -31,8 +32,11 @@ $(OBJDIR):
 test: $(EXECTEST)
 
 
-$(EXECTEST):	$(TESTDIR)/main.cpp
-	$(GXX) $(CFLAGS) $< -o $@
+$(EXECTEST): ./obj/daphnia.o ./obj/model.o ./obj/mmi.o ./tests/test.o
+	$(GXX)  $^ -o $@
+
+$(TESTDIR)/test.o: $(TESTDIR)/test.cpp $(INCFILES)
+	$(GXX) $(CFLAGS) $(LDFLAGS) $(WFLAGS) $< -o $@
 
 clean:
 	rm -rf $(OBJDIR) $(BINDIR)

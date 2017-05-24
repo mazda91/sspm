@@ -15,9 +15,10 @@ daphnia::daphnia(std::string method) : model(method){
     defaultParameters();
 }
 
+daphnia::~daphnia(){}
 
-void daphnia::defaultParameters(){
-    addParameter("length at birth", 0.8, "mm");
+void daphnia::defaultParameters() {
+    addParameter("lengthAtBirth", 0.8, "mm");
     addParameter("length at maturation ",2.5   ,"mm ");
     addParameter("maximum length ", 6  ,"mm ");
     addParameter("fraction of ingested energy ",0.3 ," ");
@@ -32,4 +33,18 @@ void daphnia::defaultParameters(){
 
 }
 
+void daphnia::setAttribute(std::string attributeName, double value){
+    if(attributeName == "lengthAtBirth"){
+        lengthAtBirth = value;
+    }else if (attributeName == "lengthAtMaturation"){
+        lengthAtMaturation = value;
+    }else if (attributeName == "maximumLength"){
+        maximumLength = value;
+    }
+}
 
+void daphnia::showAttributeList() const{
+    std::cout << "length at birth : " << this->lengthAtBirth << std::endl;
+    std::cout << "length at maturation : " << this ->lengthAtMaturation << std::endl;
+    std::cout << "maximum length : " << this->maximumLength << std::endl;
+}

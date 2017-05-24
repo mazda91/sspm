@@ -26,13 +26,14 @@ public:
      model(std::string method);
      virtual ~model();
 
-    virtual void defaultParameters() const =0;
+    virtual void defaultParameters() =0;
 //    virtual void individualGrowthRate() const = 0;           
 //    virtual void individualMortalityRate() const = 0;
 //    virtual void individualBirthRate() const = 0;
 //    virtual void resourceDynamics() const = 0;           
 //    virtual void solve() const = 0;
-
+    virtual void setAttribute(std::string attirbuteName, double value);
+    virtual void showAttributeList() const=0;
     void setParameter(std::string parameterName, double value);
     void setMethod(std::string method);
     std::string getMethod();
@@ -42,6 +43,7 @@ public:
 
     void addParameter(std::string parameterName, double value, std::string unit);
     void addParameter(parameter Parameter);
+    void showParameter(std::string parameterName);
 };
 
 

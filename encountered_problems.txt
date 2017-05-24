@@ -1,3 +1,13 @@
 1) understanding that we make the approximation that the growth rate is the same for the whole population at a given size
 2) defining priorities: man-machine interface ? models ?
 3) accepting the fact that I can't understand the whole project
+4) dealing with the number of parameters (vector ? attributes ? both ?) : for calculation functions accessing the attribute directly is better : ndon't need to search in the vector each time. But to set a value to a parameter, a vector is better
+
+5)problems with IHM if command not "perfectly" written e.g. the method before the model
+C++ problem : pointer toward an abstract class instance in a method gives an error : not declared in this scope
+              pointer toward an abstract class instance in the main : no error
+
+
+
+6)keeping an history of previous commands ( in the case a typing error occurs)
+WHYYYYYYYYYYYYYYYYY ?
