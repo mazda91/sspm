@@ -5,7 +5,14 @@
 #include <vector>
 #include <sstream>
 #include <iostream>
+#include <math.h>
 
+#define g individualGrowthRate
+#define beta individualBirthRate
+#define mu individualMortalityRate
+#define u sizeDistribution
+#define x size
+#define t time
 struct parameter{
     std::string name;
     double value;
@@ -27,11 +34,13 @@ public:
      virtual ~model();
 
     virtual void defaultParameters() =0;
-//    virtual void individualGrowthRate() const = 0;           
-//    virtual void individualMortalityRate() const = 0;
-//    virtual void individualBirthRate() const = 0;
-//    virtual void resourceDynamics() const = 0;           
-//    virtual void solve() const = 0;
+
+    virtual double sizeDistribution(double size, double time) const = 0;
+    virtual double individualGrowthRate(double size, double time) const = 0;           
+    virtual double individualMortalityRate(double size, double time) const = 0;
+    virtual double individualBirthRate(double size, double time) const  = 0;
+//    virtual void resourceDynamics()  = 0;           
+//    virtual void solve()  = 0;
     virtual void setAttribute(std::string attirbuteName, double value);
     virtual void showAttributeList() const=0;
     void setParameter(std::string parameterName, double value);

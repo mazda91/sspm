@@ -3,6 +3,8 @@
 
 #include "model.hpp"
 
+#define alpha scaledReproductionRate
+
 class daphnia : public model{
 public:
    daphnia();
@@ -11,9 +13,12 @@ public:
    virtual void defaultParameters() ;  
    virtual void setAttribute(std::string attributeName,double value);
    virtual void showAttributeList() const;
-    //void individualGrowthRate();            
-    //void individualMortalityRate(); 
-    //void individualBirthRate() ;
+    virtual double sizeDistribution(double size, double time) const;
+
+   virtual double individualGrowthRate(double size, double time) const;            
+   virtual double individualMortalityRate(double size, double time) const; 
+   virtual double individualBirthRate(double size, double time) const ;
+    double S(double time) const;
     //void resourceDynamics();            
     //void solve(); 
  
@@ -22,6 +27,7 @@ public:
     double lengthAtBirth = 0.8;
     double lengthAtMaturation = 2.5;
     double maximumLength = 6;
+    double scaledReproductionRate = 0.75;
 };
 
 

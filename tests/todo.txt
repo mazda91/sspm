@@ -1,14 +1,33 @@
 2)tester qu'une modification de paramètre via cp modifie l'attribut ET l'élément de la liste correspondant
-//---------------------------------------Test 1 : IHM -------------------------------------
-//ligne de commande : -model daphnia -method FMU
-//sortie attendue : coucou, tu es bien dans daphnia et la méthode est FMU
-//ligne de commande : -model toto -method FMU
-//sortie attendue : erreur car modèle inconnu
-//ligne de commande : -model daphnia -method FMU -cd ok
-//sortie attendue :erreur car option inconnue
-//
-//---------------------------------------Test 2------------------------------------
-//ligne de commande : -cp length at birth 3.5
-//sortie : length at birth dans les attributs : 3.5
-//         length at birth dans le vecteur de paramètres : 3.5
+---------------------------------------Test 1 : IHM -------------------------------------
+ligne de commande : -model daphnia -method FMU
+sortie attendue : coucou, tu es bien dans daphnia et la méthode est FMU
+ligne de commande : -model toto -method FMU
+sortie attendue : erreur car modèle inconnu
+ligne de commande : -model daphnia -method FMU -cd ok
+sortie attendue :erreur car option inconnue
+
+---------------------------------------Test 2------------------------------------
+ligne de commande : -cp lengthAtBirth 3.5
+sortie : lengthAtBirth dans les attributs : 3.5
+         lengthAtBirth dans le vecteur de paramètres : 3.5
+
+---------------------------------------Test 3------------------------------------
+ligne de commande : -cp lengthAtBirth 
+sortie : lengthAtBirth dans les attributs : former value of lengthAtBirth
+         lengthAtBirth dans le vecteur de paramètres : former value of lengthAtBirth
+
+---------------------------------------Test 4------------------------------------
+ligne de commande : -cp lengthAtBirth ok 
+sortie: erreur 
+
+---------------------------------------Test 5------------------------------------
+ligne de commande : -cp lengthAtBirth -sp //which behavior for the evaluate_command function ? 
+sortie: erreur 
+
+---------------------------------------Test 6------------------------------------
+ligne de commande : -method FMU -model daphnia //method provided before the model 
+sortie: model : daphnia method : FMU
+
+
 
