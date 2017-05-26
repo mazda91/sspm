@@ -11,8 +11,10 @@
 #include "daphnia.hpp"
 #include "solver.hpp"
 
+double convert(std::string);
+
 void tokenize(const std::string &s, std::vector<std::string> &tokens);
 
-void evaluate_command(std::string line, model **usedModel, solver **solveModel);
+void evaluate_command(std::string line, model **usedModel, solver **solveModel,std::vector<model *> *allModels);
 
 #endif
