@@ -51,7 +51,6 @@ void evaluate_command(std::string line, model **usedModel){
         }
         else{
             std::cout << "command " << command[i] << " not found. Type -h or -help for further information " << std::endl;;
-            exit(1);
         }
     }
 }

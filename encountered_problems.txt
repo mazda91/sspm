@@ -3,6 +3,8 @@
 3) accepting the fact that I can't understand the whole project
 4) dealing with the number of parameters (vector ? attributes ? both ?) : for calculation functions accessing the attribute directly is better : ndon't need to search in the vector each time. But to set a value to a parameter, a vector is better
 
+5)problem of parameter names, must match the way the user will type a name variable in command line and the name in the class which follows camL notation"
+At the first place : assume that variable names are perfectly typed
 C++ problem : pointer toward an abstract class instance in a method gives an error : not declared in this scope
               pointer toward an abstract class instance in the main : no error
 WHYYYYYYYYYYYYYYYYY ?

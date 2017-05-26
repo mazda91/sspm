@@ -10,7 +10,7 @@ int main() {
         std::cout << ">" ;
         getline(std::cin,line);
         evaluate_command(line, &usedModel);
-        //usedModel->solve();
+       // solve(usedModel); the way to solve is the same regardless the model
     }
         return 0;
 }

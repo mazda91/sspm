@@ -4,7 +4,11 @@
 
 model::model(){;}
 
-model::model(std::string method){this->method = method;}
+model::model(std::string method, double lengthAtBirth, double maximumLength){
+    this->method = method;
+    this->lengthAtBirth = lengthAtBirth;
+    this->maximumLength = maximumLength;
+}
 
 void model::setMethod(std::string method){ this->method = method;}
 

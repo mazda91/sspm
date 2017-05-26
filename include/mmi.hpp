@@ -5,7 +5,6 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <cassert>
 #include <map>
 #include <vector>
 #include "model.hpp"

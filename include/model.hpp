@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <vector>
+#include <cassert>
 #include <sstream>
 #include <iostream>
 #include <math.h>
@@ -10,7 +11,6 @@
 #define g individualGrowthRate
 #define beta individualBirthRate
 #define mu individualMortalityRate
-#define u sizeDistribution
 #define x size
 #define t time
 struct parameter{
@@ -23,19 +23,20 @@ class model{
 private:
      std::vector<parameter> setParameters;
      std::string method;
-    
+        
     
     
     
     
 public:
+     double lengthAtBirth;
+     double maximumLength; 
      model();
-     model(std::string method);
+     model(std::string method, double lengthAtBirth, double maximumLength);
      virtual ~model();
 
     virtual void defaultParameters() =0;
 
-    virtual double sizeDistribution(double size, double time) const = 0;
     virtual double individualGrowthRate(double size, double time) const = 0;           
     virtual double individualMortalityRate(double size, double time) const = 0;
     virtual double individualBirthRate(double size, double time) const  = 0;

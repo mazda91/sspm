@@ -11,7 +11,7 @@ daphnia::daphnia() : model(){
     defaultParameters();
 }
 
-daphnia::daphnia(std::string method) : model(method){
+daphnia::daphnia(std::string method) : model(method,0.8,6){
     defaultParameters();
 }
 
@@ -19,17 +19,17 @@ daphnia::~daphnia(){}
 
 void daphnia::defaultParameters() {
     addParameter("lengthAtBirth", 0.8, "mm");
-    addParameter("length at maturation ",2.5   ,"mm ");
-    addParameter("maximum length ", 6  ,"mm ");
-    addParameter("fraction of ingested energy ",0.3 ," ");
-    addParameter("maximum feeding rate per unit surface area ",0.0000018,"cell.mm^-2.day^-1");
-    addParameter("time constant of growth",0.15 ,"day^-1 ");
-    addParameter("shape parameter of the functional response ",0.000007 ,"ml.cell^-1 ");
-    addParameter("maximum reproduction rate per unit surface area ",0.1,"mm^-2.day^-1");
+    addParameter("lengthAtMaturation ",2.5   ,"mm ");
+    addParameter("maximumLength ", 6  ,"mm ");
+    addParameter("fractionOfIngestedEnergy ",0.3 ," ");
+    addParameter("maximumFeedingRatePerUnitSurfaceArea ",0.0000018,"cell.mm^-2.day^-1");
+    addParameter("timeConstantOfGrowth",0.15 ,"day^-1 ");
+    addParameter("shapeParameterOfTheFunctionalResponse ",0.000007 ,"ml.cell^-1 ");
+    addParameter("maximumReproductionRatePerUnitSurfaceArea ",0.1,"mm^-2.day^-1");
     addParameter("scaledReproductionRate",0.75," ");
-    addParameter("natural mortality rate",0.1,"day^-1");
-    addParameter("intrinsic growth rate for resource",0.5,"day^-1");
-    addParameter("resource carrying capacity",3,"cell.m^-1 ");
+    addParameter("naturalMortalityRate",0.1,"day^-1");
+    addParameter("intrinsicGrowthRateForResource",0.5,"day^-1");
+    addParameter("resourceCarryingCapacity",3,"cell.m^-1 ");
 
 }
 
@@ -49,7 +49,6 @@ void daphnia::showAttributeList() const{
     std::cout << "maximum length : " << this->maximumLength << std::endl;
 }
 
-double daphnia::sizeDistribution(double size, double time) const{ return 0;}
 
 double daphnia::individualGrowthRate(double size, double time) const{
     return fmax(S(t)/(1+S(t)) - size,0.0);
@@ -57,10 +56,12 @@ double daphnia::individualGrowthRate(double size, double time) const{
 
 
 double daphnia::individualBirthRate(double size, double time) const{
-    return alpha*pow(size,2)*S(time)/(1+S(time)); 
+    return alpha*pow(size,2)*S(t)/(1+S(t)); 
 }
 
 double daphnia::individualMortalityRate(double size, double time) const{
-    return 0;
+    return mu0;
 }
-double daphnia::S(double time) const {return 0;}
+double daphnia::resourceDynamics(double time) const {return 0;}
+
+
