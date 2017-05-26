@@ -12,7 +12,7 @@ void tokenize(const std::string &s, std::vector<std::string> &tokens) {
 }
 
 
-void evaluate_command(std::string line, model **usedModel){
+void evaluate_command(std::string line, model **usedModel, solver **solveModel){
     std::vector<std::string> command;
     std::string model,parameter;
     std::string method = "";
@@ -25,10 +25,11 @@ void evaluate_command(std::string line, model **usedModel){
             if ((model == "daphnia") || (model == "Daphnia")){
                *usedModel = new daphnia();
             }           
+            (*solveModel)->setModel(*usedModel);
             i += 2;
         } else if (command[i] == "-method"){
             method = command[i+1];
-            (*usedModel)->setMethod(method);
+            (*solveModel)->setMethod(method);
             i +=2;
         } else if ((command[i] ==  "-h") ||(command[i] == "-help")){
             std::cout << "here you can do ..." << std::endl;

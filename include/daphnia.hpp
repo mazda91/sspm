@@ -26,7 +26,6 @@
 class daphnia : public model{
 public:
    daphnia();
-   daphnia(std::string method);
    virtual ~daphnia();
    virtual void defaultParameters() ;  
    virtual void setAttribute(std::string attributeName,double value);

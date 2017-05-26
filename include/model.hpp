@@ -22,17 +22,13 @@ struct parameter{
 class model{
 private:
      std::vector<parameter> setParameters;
-     std::string method;
-        
-    
-    
     
     
 public:
      double lengthAtBirth;
      double maximumLength; 
      model();
-     model(std::string method, double lengthAtBirth, double maximumLength);
+     model(double lengthAtBirth, double maximumLength);
      virtual ~model();
 
     virtual void defaultParameters() =0;
@@ -45,8 +41,6 @@ public:
     virtual void setAttribute(std::string attirbuteName, double value);
     virtual void showAttributeList() const=0;
     void setParameter(std::string parameterName, double value);
-    void setMethod(std::string method);
-    std::string getMethod();
     parameter & getParameter(std::string parameterName);
     
     std::string getUnitParameter(std::string parameterName);

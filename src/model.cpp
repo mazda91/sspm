@@ -4,17 +4,14 @@
 
 model::model(){;}
 
-model::model(std::string method, double lengthAtBirth, double maximumLength){
-    this->method = method;
+model::model(double lengthAtBirth, double maximumLength){
     this->lengthAtBirth = lengthAtBirth;
     this->maximumLength = maximumLength;
 }
 
-void model::setMethod(std::string method){ this->method = method;}
 
 model::~model(){}
 
-std::string model::getMethod(){ return method;}
 
 //in the vector of parameters
 void model::setParameter(std::string parameterName, double value){

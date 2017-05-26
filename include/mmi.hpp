@@ -9,18 +9,10 @@
 #include <vector>
 #include "model.hpp"
 #include "daphnia.hpp"
+#include "solver.hpp"
 
 void tokenize(const std::string &s, std::vector<std::string> &tokens);
 
-void evaluate_command(std::string line, model **usedModel);
-
-
-
-
-
-
-
-
-
+void evaluate_command(std::string line, model **usedModel, solver **solveModel);
 
 #endif

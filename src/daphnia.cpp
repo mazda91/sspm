@@ -7,11 +7,7 @@
  *
  */
 
-daphnia::daphnia() : model(){
-    defaultParameters();
-}
-
-daphnia::daphnia(std::string method) : model(method,0.8,6){
+daphnia::daphnia() : model(0.8,6){
     defaultParameters();
 }
 
