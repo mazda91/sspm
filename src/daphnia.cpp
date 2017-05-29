@@ -7,7 +7,7 @@
  *
  */
 
-daphnia::daphnia() : model(0.8,6){
+daphnia::daphnia() : model(0.8,6,10){
     defaultParameters();
 }
 
@@ -26,7 +26,7 @@ void daphnia::defaultParameters() {
     addParameter("naturalMortalityRate",0.1,"day^-1");
     addParameter("intrinsicGrowthRateForResource",0.5,"day^-1");
     addParameter("resourceCarryingCapacity",3,"cell.m^-1 ");
-
+    addParameter("initResourceAvailable",10,"cell.m^-1 ");
 }
 
 void daphnia::setAttribute(std::string attributeName, double value){
@@ -46,18 +46,25 @@ void daphnia::showAttributeList() const{
 }
 
 
-double daphnia::individualGrowthRate(double size, double time) const{
-    return fmax(S(t)/(1+S(t)) - size,0.0);
+double daphnia::individualGrowthRate(double size, double S) const{
+    return fmax(S/(1+S) - size,0.0);
 }
 
 
-double daphnia::individualBirthRate(double size, double time) const{
-    return alpha*pow(size,2)*S(t)/(1+S(t)); 
+double daphnia::individualBirthRate(double size,double S) const{
+    return alpha*pow(size,2)*S/(1+S); 
 }
 
-double daphnia::individualMortalityRate(double size, double time) const{
+double daphnia::individualMortalityRate(double size, double S) const{
     return mu0;
 }
-double daphnia::resourceDynamics(double time) const {return 0;}
+double daphnia::dS(double S, std::vector<double> &x, std::vector<double> &u) {
+    double integral = 0;
+   for (unsigned int i=0;i<(x.size()-1);i++){
+        integral += (x[i+1] - x[i])*(pow(x[i+1],2)*u[i+1]+ pow(x[i],2)*u[i])/2.0;
+   } 
+   return r*S*(1-S/K)-(S/(1+S))*integral;
+
+}
 
 

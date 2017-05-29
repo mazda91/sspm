@@ -9,6 +9,7 @@ C++ problem : pointer toward an abstract class instance in a method gives an err
               pointer toward an abstract class instance in the main : no error
 WHYYYYYYYYYYYYYYYYY ?
 
-
+6) tridiagonal linear system (S3), why Gauss-Thomas algorithm more than another one : cf wikipedia
++ strictly dominant matrix in our case
 6)keeping an history of previous commands ( in the case a typing error occurs)
 

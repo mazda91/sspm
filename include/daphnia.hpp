@@ -18,8 +18,6 @@
 #define K resourceCarryingCapacity
 #define lm maximumLength
 //-------------functions macros ------------------
-#define S resourceDynamics
-
 
 
 
@@ -31,10 +29,10 @@ public:
    virtual void setAttribute(std::string attributeName,double value);
    virtual void showAttributeList() const;
 
-   virtual double individualGrowthRate(double size, double time) const;            
-   virtual double individualMortalityRate(double size, double time) const; 
-   virtual double individualBirthRate(double size, double time) const ;
-    double resourceDynamics(double time) const;
+   virtual double individualGrowthRate(double size, double S) const;            
+   virtual double individualMortalityRate(double size, double S) const; 
+   virtual double individualBirthRate(double size, double S) const ;
+   virtual double resourceDynamics(double S, std::vector<double> &x, std::vector<double> &u);
  
    //the idea is the following : for calculation functions and a better readability(avoiding this like lengthAtBirth.value or get("lengthAtBirth").value for each parameter, enumeration of attributes corresponding to parameters, but just a name and a value 
    //then, if we want details for the parameter : name, unit... vector of parameters
@@ -50,6 +48,7 @@ public:
     double naturalMortalityRate = 0.1;
     double intrinsicGrowthRateForResource = 0.5;
     double resourceCarryingCapacity = 3;
+
 };
 
 

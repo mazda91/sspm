@@ -13,6 +13,9 @@
 #define mu individualMortalityRate
 #define x size
 #define t time
+#define S0 initResourceAvailable
+#define dS resourceDynamics
+#define dR resourceDynamics
 struct parameter{
     std::string name;
     double value;
@@ -27,17 +30,18 @@ private:
 public:
      double lengthAtBirth;
      double maximumLength; 
+     double initResourceAvailable;
+
      model();
-     model(double lengthAtBirth, double maximumLength);
+     model(double lengthAtBirth, double maximumLength, double initResourceAvailable);
      virtual ~model();
 
     virtual void defaultParameters() =0;
 
-    virtual double individualGrowthRate(double size, double time) const = 0;           
-    virtual double individualMortalityRate(double size, double time) const = 0;
-    virtual double individualBirthRate(double size, double time) const  = 0;
-//    virtual void resourceDynamics()  = 0;           
-//    virtual void solve()  = 0;
+    virtual double resourceDynamics(double resource, std::vector<double> &mesh, std::vector<double> &distribution) = 0;
+    virtual double individualGrowthRate(double size, double S) const = 0;           
+    virtual double individualMortalityRate(double size, double S) const = 0;
+    virtual double individualBirthRate(double size, double S) const  = 0;
     virtual void setAttribute(std::string attirbuteName, double value);
     virtual void showAttributeList() const=0;
     void setParameter(std::string parameterName, double value);

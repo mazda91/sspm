@@ -4,9 +4,10 @@
 
 model::model(){;}
 
-model::model(double lengthAtBirth, double maximumLength){
+model::model(double lengthAtBirth, double maximumLength, double initResourceAvailable){
     this->lengthAtBirth = lengthAtBirth;
     this->maximumLength = maximumLength;
+    this->initResourceAvailable = initResourceAvailable;
 }
 
 
@@ -17,9 +18,6 @@ model::~model(){}
 void model::setParameter(std::string parameterName, double value){
     getParameter(parameterName).value = value;
 }
-
-
-void model::setAttribute(std::string attributeName, double value){}
 
 /*
  *@todo : Throwing exception here in case the parameter is not in the set
