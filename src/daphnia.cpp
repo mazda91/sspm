@@ -7,16 +7,16 @@
  *
  */
 
-daphnia::daphnia() : model(0.8,6,10){
+daphnia::daphnia() : model(0,6/6,10){
     defaultParameters();
 }
 
 daphnia::~daphnia(){}
 
 void daphnia::defaultParameters() {
-    addParameter("lengthAtBirth", 0.8, "mm");
-    addParameter("lengthAtMaturation ",2.5   ,"mm ");
-    addParameter("maximumLength ", 6  ,"mm ");
+    addParameter("lengthAtBirth", 0, "mm");
+    addParameter("lengthAtMaturation ",2.5/6   ,"mm ");
+    addParameter("maximumLength ", 6/6  ,"mm ");
     addParameter("fractionOfIngestedEnergy ",0.3 ," ");
     addParameter("maximumFeedingRatePerUnitSurfaceArea ",0.0000018,"cell.mm^-2.day^-1");
     addParameter("timeConstantOfGrowth",0.15 ,"day^-1 ");
@@ -47,7 +47,7 @@ void daphnia::showAttributeList() const{
 
 
 double daphnia::individualGrowthRate(double size, double S) const{
-    return fmax(S/(1+S) - size,0.0);
+    return fmax(S/(1+S) - size,0.00001);
 }
 
 
@@ -63,6 +63,7 @@ double daphnia::dS(double S, std::vector<double> &x, std::vector<double> &u) {
    for (unsigned int i=0;i<(x.size()-1);i++){
         integral += (x[i+1] - x[i])*(pow(x[i+1],2)*u[i+1]+ pow(x[i],2)*u[i])/2.0;
    } 
+   //std::cout << integral << std::endl;
    return r*S*(1-S/K)-(S/(1+S))*integral;
 
 }

@@ -1,7 +1,8 @@
 GXX=g++
-CFLAGS= -c  -std=c++11
+CFLAGS= -c  -std=c++11 
 WFLAGS= -Wall -Wextra
 LDFLAGS= -g
+CImgFLAGS = -O2 -L/usr/X11R6/lib -lm -lpthread -lX11
 
 SRCDIR = ./src
 OBJDIR = ./obj
@@ -18,7 +19,7 @@ EXECTEST = $(TESTDIR)/test
 all: $(EXEC)
 
 $(EXEC) : $(OBJFILES)
-	$(GXX) $^ -o $@ 
+	$(GXX) -g -o $@  $^ $(CImgFLAGS)
 
 $(OBJDIR)/%.o :  $(SRCDIR)/%.cpp $(OBJDIR) 
 	$(GXX) $(CFLAGS) $(LDFLAGS) $(WFLAGS) $< -o $@

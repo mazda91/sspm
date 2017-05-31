@@ -36,9 +36,9 @@ public:
  
    //the idea is the following : for calculation functions and a better readability(avoiding this like lengthAtBirth.value or get("lengthAtBirth").value for each parameter, enumeration of attributes corresponding to parameters, but just a name and a value 
    //then, if we want details for the parameter : name, unit... vector of parameters
-    double lengthAtBirth = 0.8;
-    double lengthAtMaturation = 2.5;
-    double maximumLength = 6;
+    double lengthAtBirth = 0;
+    double lengthAtMaturation = 2.5/6;
+    double maximumLength = 6/6;
     double fractionOfIngestedEnergy = 0.3;
     double maximumFeedingRatePerUnitSurfaceArea = 0.0000018;
     double timeConstantOfGrowth = 0.15;

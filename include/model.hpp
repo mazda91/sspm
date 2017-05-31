@@ -8,14 +8,18 @@
 #include <iostream>
 #include <math.h>
 
+#include "../../../software/CImg-2.0.0/CImg.h"
+
 #define g individualGrowthRate
 #define beta individualBirthRate
 #define mu individualMortalityRate
-#define x size
+//#define x size
 #define t time
 #define S0 initResourceAvailable
 #define dS resourceDynamics
 #define dR resourceDynamics
+
+using namespace cimg_library;
 struct parameter{
     std::string name;
     double value;
@@ -42,7 +46,7 @@ public:
     virtual double individualGrowthRate(double size, double S) const = 0;           
     virtual double individualMortalityRate(double size, double S) const = 0;
     virtual double individualBirthRate(double size, double S) const  = 0;
-    virtual void setAttribute(std::string attirbuteName, double value);
+    virtual void setAttribute(std::string attirbuteName, double value)=0;
     virtual void showAttributeList() const=0;
     void setParameter(std::string parameterName, double value);
     parameter & getParameter(std::string parameterName);
