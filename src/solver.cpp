@@ -81,6 +81,8 @@ void solver::solve_MU(unsigned int move){
     double dUi,sumBirth, rMinus, rPlus,rhoMinus, rhoPlus;
     double S = usedModel->S0;double factor;
     double tmp1;
+    //displayEquilibrum(); //set u to the equilibrum state
+    //showContent(u);
     std::vector<double> a,b,c,d,dx;
     for(unsigned int j =0; j<M; j++){//time
         //FIRST WE compute the variations of xi's
@@ -112,23 +114,28 @@ void solver::solve_MU(unsigned int move){
                     sumBirth +=(x[k+1] - x[k]) * usedModel->beta(X(k),S)*U[k];
                 }
                 tmp1 = usedModel->g(usedModel->lengthAtBirth,S);
-                dUi = (1/tmp1)*sumBirth;
+                U[0] += (1/tmp1)*sumBirth;
             }
-           
-            dUi += -usedModel->mu(X(i),S)*U[i] - (1/(x[i+1]-x[i]))*(usedModel->g(x[i+1],S)*u[i+1] -  usedModel->g(x[i],S)*u[i] );
-            if(move == 1){
-                dUi += (1/(x[i+1]-x[i]))*(dx[i+1]*u[i+1] - dx[i]*u[i] - (dx[i+1] - dx[i])*U[i]); 
+            else{
+                dUi += -usedModel->mu(X(i),S)*U[i] - (1/(x[i+1]-x[i]))*(usedModel->g(x[i+1],S)*u[i+1] -  usedModel->g(x[i],S)*u[i] );
+                if(move == 1){
+                    dUi += (1/(x[i+1]-x[i]))*(dx[i+1]*u[i+1] - dx[i]*u[i] - (dx[i+1] - dx[i])*U[i]); 
+                }
+                
+                U[i] = U[i] + step*dUi;//for all i, we have the average distribution on each interval
             }
-            U[i] = U[i] + step*dUi;//for all i, we have the average distribution on each interval
         }
         //now, we calculate the density at each boundary
         u[0] = U[0]; //cf equation (1b)
         u[1] = u[0];//assumption made before finding a solution to the boundary pbm
+        //std::cout << u[0] << std::endl;
         for (unsigned int i=2; i<=(N-1);i++){//still size
             rMinus = (U[i]-U[i-1])*(x[i]-x[i-2])/((U[i-1]-U[i-2])*(x[i-1]-x[i-2]));
             rPlus = (U[i-1]-U[i])*(x[i]-x[i+2])/((U[i]-U[i+1])*(x[i-1]-x[i]));
             if(usedModel->g(x[i],S) >=0){
-               u[i] = U[i-1] + phi(rMinus)*(U[i-1]-U[i-2])*(x[i]-x[i-1])/(x[i+1]-x[i-1]); 
+               tmp1 = phi(rMinus)*(U[i-1]-U[i-2])*(x[i]-x[i-1])/(x[i+1]-x[i-1]); 
+                //std::cout << tmp1 << std::endl;
+               u[i] = U[i-1] + tmp1;            
             }   
             else{
                 u[i] = U[i] - phi(rPlus)*(U[i+1]-U[i])*(x[i+1]-x[i])/(x[i+2]-x[i]); 
@@ -138,7 +145,7 @@ void solver::solve_MU(unsigned int move){
 
     //must compute the new resourceDynamics S
     S = S + step*usedModel->dS(S,x,u);
-    std::cout << j << " : " << S << std::endl;
+    //std::cout << j << " : " << S << std::endl;
   }
 }
 
@@ -217,4 +224,34 @@ void solver::display(){
          }  
          // Display interactive plot window.
          values.display_graph();
+}
+
+void solver::displayEquilibrum(){
+    double tmp,Seq, xeq,ustar;
+    std::vector<double> ueq;
+    unsigned int i = 0;
+    tmp = 0.1*(1+0.1)*(2+0.1)/(2*0.75);
+    xeq = pow(tmp,(double (1)/3));
+    std::cout << "xeq = " << xeq << std::endl;
+    Seq = xeq/(1-xeq);
+    while (x[i] <= xeq){
+        ustar = 0.75*0.5*Seq*(1-Seq/3)*pow((xeq-x[i]),0.1-1)/pow(xeq,0.1);
+        ueq.push_back(ustar);
+        i++;
+    }
+    u = ueq;
+    double array[ueq.size()];                                                       
+    for (unsigned int i = 0; i< ueq.size(); ++i){                                              
+        array[i] = ueq[i];                          
+        //std::cout << "index "<< i << " : " << ueq[i] << std::endl;
+    }                                                                          
+    // Affiche le sous forme de graphique.                                     
+    CImg<>(array,ueq.size()).display_graph("Equilibrum distribution",1); 
+
+}
+
+void solver::showContent(std::vector<double> vec){
+    for(unsigned int i=0;i<vec.size();i++){
+        std::cout << vec[i] << std::endl;
+    }
 }
