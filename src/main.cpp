@@ -12,7 +12,6 @@ int main() {
         std::cout << ">" ;
         getline(std::cin,line);
         evaluate_command(line, &usedModel, &solveModel, &allModels);
-        solveModel->solve();
         solveModel->reInitialize();
         //solveModel->displayEquilibrum();
     }

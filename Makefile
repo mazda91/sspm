@@ -42,6 +42,8 @@ $(TESTDIR)/test.o: $(TESTDIR)/test.cpp $(INCFILES)
 	$(GXX) $(CFLAGS) $(LDFLAGS) $(WFLAGS) $< -o $@
 
 clean:
-	rm -rf $(OBJDIR) $(BINDIR)
+	rm -rf $(OBJDIR) $(BINDIR) $(SRCDIR)/*.sw* $(INCDIR)/*.sw* ./*.sw*
+
+
 
 

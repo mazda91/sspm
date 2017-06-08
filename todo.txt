@@ -1,0 +1,23 @@
+5)problem of parameter names, must match the way the user will type a name variable in command line and the name in the class which follows camL notation"
+
+for MMU, test if the sizeMesh correctly moves with the solution
+
+destructors
+
+portability of the code, makefile
+documentation of the code
+reinitialize u, U and x at each main loop
+At the first place : assume that variable names are perfectly typed
+NB : engPutVarariable must be typed once the variable has been updated
+
+prove that GaussThomasAlgo is stable in our case( dominant matrix)
+
+6)keeping an history of previous commands ( in the case a typing error occurs)
+
+destroy arrays in engine
+
+making that if lengthAtBirth > maximumLength : return errors
+
+ask about S0 and intital distribution
+
+make temporalRegularization modifiable

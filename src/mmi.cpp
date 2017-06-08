@@ -23,10 +23,11 @@ void evaluate_command(std::string line, model **usedModel, solver **solveModel, 
     std::vector<std::string> command;
     std::string model,parameter;
     std::string method = "";
+    bool found = true;
     double value;
     tokenize(line,command);
     unsigned int i = 0;
-    while (i < command.size()){
+    while ((i < command.size()) && (found == true)){
         if (command[i] == "-model"){
             model = command[i+1];
             if ((model == "daphnia") || (model == "Daphnia")){
@@ -62,9 +63,33 @@ void evaluate_command(std::string line, model **usedModel, solver **solveModel, 
         }else if(command[i] == "-sp"){//to show a parameter's info
             (*usedModel)->showParameter(command[i+1]);
             i += 2;
-        }
-        else{
-            std::cout << "command " << command[i] << " not found. Type -h or -help for further information " << std::endl;;
+        }else if(command[i] == "-solve"){
+            if ((*usedModel) == NULL){
+                std::cout << "No model defined. Can't solve." << std::endl;
+                std::cout << "All the information provided after '" << command[i] << "'have not been taken into account." << std::endl;
+                found = false;
+            }
+            else{
+                (*solveModel)->solve();
+                i += 1;
+            }
+        }else if(command[i] == "-initSolver"){
+            (*solveModel)->initParameters();
+            i += 1;
+        }else if(command[i] == "-initModel"){
+            if ((*usedModel) == NULL){
+                std::cout << "No model defined. Can't initialize." << std::endl;
+                std::cout << "All the information provided after '" << command[i] << "'have not been taken into account." << std::endl;
+                found = false;
+            }
+            else{
+                (*usedModel)->defaultParameters();
+                i += 1;
+            }
+        }else{
+            std::cout << "command " << command[i] << " not found. Type -h or -help for further information " << std::endl;
+            std::cout << "All the information provided after '" << command[i] << "'have not been taken into account." << std::endl;
+            found = false;
         }
     }
 }

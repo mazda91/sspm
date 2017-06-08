@@ -65,7 +65,13 @@ void solver::setInitialDistribution(){ //we assume that, initially, the distribu
 
 void solver::reInitialize(){
     setInitialDistribution();
-    setSizeMesh();
+    if (this->usedModel != NULL){
+        setSizeMesh();
+    }
+}
+
+void solver::initParameters(){
+    setN(10);setM(10); setTf(10); tau = 1;
 }
 
 double phi(double r){
@@ -194,6 +200,9 @@ void solver::solve_MU(unsigned int move){
     //must compute the new resourceDynamics S
     S = S + step*usedModel->dS(S,x,u);
   }
+    mxDestroyArray(u_mx);mxDestroyArray(dx_mx);mxDestroyArray(x_mx);
+    mxDestroyArray(t_mx);mxDestroyArray(n_mx);mxDestroyArray(m_mx);
+    mxDestroyArray(ft_mx);
     engClose(ep);
 }
 

@@ -14,6 +14,7 @@ daphnia::daphnia() : model(0,6/6,10){
 daphnia::~daphnia(){}
 
 void daphnia::defaultParameters() {
+    setParameters.clear();
     addParameter("lengthAtBirth", 0, "mm");
     addParameter("maximumLength ", 1  ,"mm ");
     addParameter("scaledReproductionRate",0.75," ");
@@ -21,6 +22,15 @@ void daphnia::defaultParameters() {
     addParameter("intrinsicGrowthRateForResource",0.5,"day^-1");
     addParameter("resourceCarryingCapacity",3,"cell.m^-1 ");
     addParameter("initResourceAvailable",10,"cell.m^-1 ");
+
+    lengthAtBirth = 0;
+    maximumLength = 1;
+    fractionOfIngestedEnergy = 0.3;
+    scaledReproductionRate = 0.75;
+    naturalMortalityRate = 0.1;
+    intrinsicGrowthRateForResource = 0.5;
+    resourceCarryingCapacity = 3;
+    initResourceAvailable = 10;
 }
 
 void daphnia::setAttribute(std::string attributeName, double value){

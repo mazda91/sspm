@@ -1,0 +1,5 @@
+<map id="include/mmi.hpp" name="include/mmi.hpp">
+<area shape="rect" id="node8" href="$model_8hpp.html" title="contains Life history elements and parameters common to all size&#45;structured population models ..." alt="" coords="259,155,341,181"/>
+<area shape="rect" id="node11" href="$daphnia_8hpp.html" title="Contains Life history elements and Parameters of the size&#45;structured Daphnia model. " alt="" coords="198,80,290,107"/>
+<area shape="rect" id="node12" href="$solver_8hpp.html" title="Contains any function and element related to the resolutuin of the SSPMs. " alt="" coords="467,80,549,107"/>
+</map>
