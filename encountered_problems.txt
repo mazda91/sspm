@@ -3,16 +3,13 @@
 3) accepting the fact that I can't understand the whole project
 4) dealing with the number of parameters (vector ? attributes ? both ?) : for calculation functions accessing the attribute directly is better : ndon't need to search in the vector each time. But to set a value to a parameter, a vector is better
 
-5)problem of parameter names, must match the way the user will type a name variable in command line and the name in the class which follows camL notation"
-At the first place : assume that variable names are perfectly typed
 C++ problem : pointer toward an abstract class instance in a method gives an error : not declared in this scope
               pointer toward an abstract class instance in the main : no error
 WHYYYYYYYYYYYYYYYYY ?
 
+n-2) infinite condition matrix
 n-1) dealing with new techniques like matlab engines
-NB : engPutVarariable must be typed once the variable has been updated
 n)re initialize all data if two commands are typed in the same main loop
 6) tridiagonal linear system (S3), why Gauss-Thomas algorithm more than another one : cf wikipedia
 + strictly dominant matrix in our case
-6)keeping an history of previous commands ( in the case a typing error occurs)
 

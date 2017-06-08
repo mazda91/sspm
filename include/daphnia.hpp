@@ -5,13 +5,7 @@
 
 //---------------attributes macros --------------
 #define lb lengthAtBirth
-//#define lj lengthAtMaturation
 #define lm maximumLength
-//#define kappa fractionOfIngestedEnergy
-//#define nux maximumFeedingRatePerUnitSurfaceArea
-//#define gamma timeConstantOfGrowth
-//#define xi shapeParameterOfTheFunctionalResponse
-//#define rm maximumReproductionRatePerUnitSurfaceArea
 #define alpha scaledReproductionRate
 #define mu0 naturalMortalityRate
 #define r intrinsicGrowthRateForResource

@@ -17,11 +17,21 @@ private:
     unsigned int M = 10;//default value for the number of time range intervals
     double Tf = 10.0; //  default value for the solver ending time 
     double temporalRegularization = 1;
-        std::vector<double> U;//vector of Ui's (average of the distribution we look for on each subdivsion interval)
-public:
+    std::vector<double> U;//vector of Ui's (average of the distribution we look for on each subdivsion interval)
     std::vector<double> x;//sizeMesh  
     std::vector<double> u;//approximation of the distribution ( our solution)
+    
+    void setSizeMesh();
+    void setInitialDistribution();
+    double regularizingFactor() const; //need u(t) and u(t+dt) to compute the derivative
+    double monitor(unsigned int i, double regularizingFactor);
+    inline double X(unsigned int k){return (x[k]+x[k+1])/2;}
+    void  GaussThomasAlgo(std::vector<double> a, std::vector<double> b, std::vector<double> c, std::vector<double> d,std::vector<double> & solution);
+    void solve_MU(unsigned int move);    
 
+
+public:
+    
     solver();
     ~solver();
 
@@ -31,17 +41,8 @@ public:
     void setM(unsigned int nbTimeIntervals);
     void setTf(float finalTime);
     void setTemporalRegularization(double tau);
-    void setSizeMesh();
-    void setInitialDistribution();
+    void reInitialize();
     void solve();
-    void solve_MU(unsigned int move);    
-    void setMeshBoundary(unsigned int i, double value);
-    double getMeshBoundary(unsigned int i);
-    double regularizingFactor() const; //need u(t) and u(t+dt) to compute the derivative
-    double monitor(unsigned int i, double regularizingFactor);
-    inline double X(unsigned int k){return (x[k]+x[k+1])/2;}
-    void  GaussThomasAlgo(std::vector<double> a, std::vector<double> b, std::vector<double> c, std::vector<double> d,std::vector<double> & solution);
-    //void display();
     //void displayEquilibrum();
     void showContent(std::vector<double>);
 

@@ -15,13 +15,7 @@ daphnia::~daphnia(){}
 
 void daphnia::defaultParameters() {
     addParameter("lengthAtBirth", 0, "mm");
-    //addParameter("lengthAtMaturation ",2.5/6   ,"mm ");
-    addParameter("maximumLength ", 6/6  ,"mm ");
-   // addParameter("fractionOfIngestedEnergy ",0.3 ," ");
-   // addParameter("maximumFeedingRatePerUnitSurfaceArea ",0.0000018,"cell.mm^-2.day^-1");
-   // addParameter("timeConstantOfGrowth",0.15 ,"day^-1 ");
-   // addParameter("shapeParameterOfTheFunctionalResponse ",0.000007 ,"ml.cell^-1 ");
-   // addParameter("maximumReproductionRatePerUnitSurfaceArea ",0.1,"mm^-2.day^-1");
+    addParameter("maximumLength ", 1  ,"mm ");
     addParameter("scaledReproductionRate",0.75," ");
     addParameter("naturalMortalityRate",0.1,"day^-1");
     addParameter("intrinsicGrowthRateForResource",0.5,"day^-1");
@@ -32,8 +26,6 @@ void daphnia::defaultParameters() {
 void daphnia::setAttribute(std::string attributeName, double value){
     if(attributeName == "lengthAtBirth"){
         lengthAtBirth = value;
-    //}else if (attributeName == "lengthAtMaturation"){
-       // lengthAtMaturation = value;
     }else if (attributeName == "maximumLength"){
         maximumLength = value;
     }
@@ -41,7 +33,6 @@ void daphnia::setAttribute(std::string attributeName, double value){
 
 void daphnia::showAttributeList() const{
     std::cout << "length at birth : " << this->lengthAtBirth << std::endl;
-    //std::cout << "length at maturation : " << this ->lengthAtMaturation << std::endl;
     std::cout << "maximum length : " << this->maximumLength << std::endl;
 }
 
@@ -63,7 +54,6 @@ double daphnia::dS(double S, std::vector<double> &x, std::vector<double> &u) {
    for (unsigned int i=0;i<(x.size()-1);i++){
         integral += (x[i+1] - x[i])*(pow(x[i+1],2)*u[i+1]+ pow(x[i],2)*u[i])/2.0;
    } 
-   //std::cout << integral << std::endl;
    return r*S*(1-S/K)-(S/(1+S))*integral;
 
 }
