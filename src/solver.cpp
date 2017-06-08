@@ -127,7 +127,6 @@ void solver::solve_MU(unsigned int move){
     engPutVariable(ep,"Tf",ft_mx);
     engPutVariable(ep,"M",m_mx);
     engPutVariable(ep,"N",n_mx); 
-    //showContent(x);
     for(unsigned int j =0; j<M; j++){//time
         pt[0] = j*step;
         engPutVariable(ep,"ti",t_mx);
