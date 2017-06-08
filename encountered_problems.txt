@@ -9,6 +9,9 @@ C++ problem : pointer toward an abstract class instance in a method gives an err
               pointer toward an abstract class instance in the main : no error
 WHYYYYYYYYYYYYYYYYY ?
 
+n-1) dealing with new techniques like matlab engines
+NB : engPutVarariable must be typed once the variable has been updated
+n)re initialize all data if two commands are typed in the same main loop
 6) tridiagonal linear system (S3), why Gauss-Thomas algorithm more than another one : cf wikipedia
 + strictly dominant matrix in our case
 6)keeping an history of previous commands ( in the case a typing error occurs)

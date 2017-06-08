@@ -13,9 +13,8 @@ int main() {
         getline(std::cin,line);
         evaluate_command(line, &usedModel, &solveModel, &allModels);
         solveModel->solve();
-        //solveModel->showContent(solveModel->x);
-        solveModel->display();
-        solveModel->displayEquilibrum();
+        //solveModel->display();
+        //solveModel->displayEquilibrum();
     }
         for (unsigned int i=0;i<allModels.size();i++){
         delete allModels[allModels.size()-1-i];

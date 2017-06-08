@@ -1,9 +1,10 @@
 GXX=g++
-CFLAGS= -c  -std=c++11 
+CFLAGS= -c  -std=c++11 -I $(matlabroot)/extern/include/ 
 WFLAGS= -Wall -Wextra
 LDFLAGS= -g
+LIBS= -L$(matlabroot)/bin/glnxa64 -leng -lmx -lmat
+matlabroot= /usr/local/MATLAB/R2017a
 CImgFLAGS = -O2 -L/usr/X11R6/lib -lm -lpthread -lX11
-
 SRCDIR = ./src
 OBJDIR = ./obj
 INCDIR = ./include
@@ -17,13 +18,14 @@ EXEC = $(BINDIR)/main
 EXECTEST = $(TESTDIR)/test
 
 all: $(EXEC)
-
+	
 $(EXEC) : $(OBJFILES)
-	$(GXX) -g -o $@  $^ $(CImgFLAGS)
+	$(GXX) -g -o $@  $^ $(LIBS) -Wl,-rpath-link,$(matlabroot)/bin/glnxa64 
 
-$(OBJDIR)/%.o :  $(SRCDIR)/%.cpp $(OBJDIR) 
-	$(GXX) $(CFLAGS) $(LDFLAGS) $(WFLAGS) $< -o $@
+$(OBJDIR)/%.o :  $(SRCDIR)/%.cpp $(OBJDIR)  
+	$(GXX) $(CFLAGS) $(LDFLAGS) $(WFLAGS) $(LIBS)  $< -o $@
 
+	
 $(OBJFILES): | $(OBJDIR)
 
 $(OBJDIR):

@@ -2,6 +2,10 @@
 #define SOLVER_HPP
 
 #include "model.hpp"
+//#include "/usr/local/MATLAB/R2017a/extern/include/engine.h"
+#include "engine.h"
+#include <time.h>
+
 #define phi superbeeFluxLimiter
 #define tau temporalRegularization
 
@@ -37,8 +41,8 @@ public:
     double monitor(unsigned int i, double regularizingFactor);
     inline double X(unsigned int k){return (x[k]+x[k+1])/2;}
     void  GaussThomasAlgo(std::vector<double> a, std::vector<double> b, std::vector<double> c, std::vector<double> d,std::vector<double> & solution);
-    void display();
-    void displayEquilibrum();
+    //void display();
+    //void displayEquilibrum();
     void showContent(std::vector<double>);
 
 };

@@ -1,8 +1,5 @@
 #include "../include/solver.hpp"
 
-
-
-
 /*
  *@todo : resize the vectors x,u and U if N changes
  *
@@ -25,9 +22,18 @@ void solver::setMethod(std::string method){this->usedMethod = method;}
  *resize u,U and x
  */
 void solver::setN(unsigned int nbSizeIntervals){
+    u.clear();
+    U.clear();
     this->N = nbSizeIntervals;
-    u.resize(this->N + 1,(double (1))/(this->N + 1));
-    U.resize(this->N,(double (1))/this->N);
+    srand(time(NULL));
+    double tmp1;
+    for (unsigned int i=0; i<N;i++){
+        tmp1 = (double (rand()%N))/N;
+        U.push_back(tmp1);
+        u.push_back(tmp1);
+    }
+    u.push_back(double (rand()%N)/N);
+
     setSizeMesh();
 }
 
@@ -46,8 +52,14 @@ void solver::setSizeMesh(){
 }
 
 void solver::setInitialDistribution(){ //we assume that, initially, the distribution is equal between classes
-    U = std::vector<double>(N,(double (1))/N);
-    u = std::vector<double>(N+1,(double (1))/(N+1));
+    srand(time(NULL));
+    double tmp1;
+    for (unsigned int i=0; i<N;i++){
+        tmp1 = (double (rand()%N))/N;
+        U.push_back(tmp1);
+        u.push_back(tmp1);
+    }
+    u.push_back((double (rand()%N))/N);
 }
 
 void solver::setMeshBoundary(unsigned int i, double value){
@@ -81,30 +93,101 @@ void solver::solve_MU(unsigned int move){
     double dUi,sumBirth, rMinus, rPlus,rhoMinus, rhoPlus;
     double S = usedModel->S0;double factor;
     double tmp1;
+    Engine *ep = engOpen("");
     //displayEquilibrum(); //set u to the equilibrum state
     //showContent(u);
-    std::vector<double> a,b,c,d,dx;
-    for(unsigned int j =0; j<M; j++){//time
+    mxArray *A_mx = mxCreateDoubleMatrix(u.size(),u.size(),mxREAL);
+    mxArray *u_mx = mxCreateDoubleMatrix(u.size(),1,mxREAL);
+    mxArray *dx_mx;// = mxCreateDoubleMatrix(u.size(),1,mxREAL);
+    mxArray *b_mx = mxCreateDoubleMatrix(u.size(),1,mxREAL);
+    mxArray *x_mx = mxCreateDoubleMatrix(u.size(),1,mxREAL);
+    mxArray *m_mx = mxCreateDoubleScalar(M);
+    mxArray *n_mx = mxCreateDoubleScalar(N);
+    mxArray *t_mx = mxCreateDoubleScalar(0);
+    mxArray *ft_mx = mxCreateDoubleScalar(0);
+    mxArray *tmp = mxCreateDoubleScalar(0);
+
+    double *pA = mxGetPr(A_mx);
+    double *pu = mxGetPr(u_mx);
+    double *pdx;// = mxGetPr(dx_mx);
+    double *pb = mxGetPr(b_mx);
+    double *px = mxGetPr(x_mx);
+    double *pm = mxGetPr(m_mx);
+    double *pn = mxGetPr(n_mx);
+    double *pt = mxGetPr(t_mx);
+    double *pft = mxGetPr(ft_mx);
+
+    pft[0] = Tf;
+    pm[0] = M;
+    pn[0]=N;
+    engPutVariable(ep,"Tf",ft_mx);
+    engPutVariable(ep,"M",m_mx);
+    engPutVariable(ep,"N",n_mx); 
+    //showContent(x);
+    for(unsigned int j =0; j<1; j++){//time
+        pt[0] = j*step;
+        engPutVariable(ep,"ti",t_mx);
+        for(unsigned int i=0; i< u.size(); i++){
+            px[i] = x[i];
+            pu[i] = u[i];
+        }
+        engPutVariable(ep,"x",x_mx);
+        engPutVariable(ep,"u",u_mx);
+        engEvalString(ep,"plot(x,u);");
+        //engEvalString(ep,"axis([0 1 -1 3]);");
+        //engEvalString(ep,"grid on;");
+        engEvalString(ep,"title(sprintf('t = %0.3f',ti));");
+        engEvalString(ep,"pause(Tf/M);");
         //FIRST WE compute the variations of xi's
         if(move==1){
-             //build the vectors of coefficients composing the matrix A s.t A.dx = d
-              a.push_back(0);b.push_back(1);c.push_back(0);d.push_back(0);
-              factor = regularizingFactor();
-              for (unsigned int i =1 ; i<= N-1 ; i++){
-                 rhoMinus = (monitor(i-1,factor)+monitor(i,factor))/2;
-                 rhoPlus = (monitor(i+1,factor)+monitor(i,factor))/2;
-                 a.push_back(rhoMinus);
-                 b.push_back(-(rhoPlus + rhoMinus));
-                 c.push_back(rhoPlus);
-                 d.push_back(-(1/tau)*(rhoPlus*(x[i+1]-x[i]) - rhoMinus*(x[i]-x[i-1])));
-              }
-              a.push_back(0);b.push_back(1);c.push_back(0);d.push_back(0);
-              //apply the Gauss-Thomas algo on this system to find the set of dxi
-              GaussThomasAlgo(a,b,c,d,dx);
+            factor = regularizingFactor();
+            //std::cout << "factor : " << factor << std::endl;
+            for (unsigned int i = 1; i<N; i++){
+                rhoMinus = (monitor(i-1,factor)+monitor(i,factor))/2;
+                rhoPlus = (monitor(i+1,factor)+monitor(i,factor))/2;
+                tmp1 = -(1/tau)*(rhoPlus*(x[i+1]-x[i]) - rhoMinus*(x[i]-x[i-1]));
+                pA[i *N +i] = -(rhoPlus + rhoMinus);
+                pA[i*N + i-1] = rhoMinus;
+                pA[i *N + i+1] = rhoPlus;
+                pb[i] = tmp1;
+                //std::cout << i << " : " << rhoMinus << " / " << rhoPlus <<  " / " << tmp1 << std::endl;
+            }
+            pb[0] = 0;pb[N] = 0;
+            pA[0] = 1; pA[N * N] = 1;
+             
+            engPutVariable(ep,"A",A_mx);
+            engPutVariable(ep,"b",b_mx);
+            
+            engEvalString(ep,"tmp = cond(A);");
+            double *val =  (double *)mxGetData(engGetVariable(ep,"tmp"));
+            std::cout << "cond : " << *val << std::endl;
+            engEvalString(ep,"tmp = det(A);");
+            val =  (double *)mxGetData(engGetVariable(ep,"tmp"));
+            std::cout << "det : " << *val << std::endl;
+            engEvalString(ep,"dx=linsolve(A,b);");
+            //engEvalString(ep,"dx = linsolve(eye(N+1),b);");
+            dx_mx = engGetVariable(ep,"dx");
+            pdx = (double *)mxGetData(dx_mx);
+            std::cout << "" << std::endl;
+            std::cout << "---------------------------" << std::endl;
+            //for (unsigned int k=0; k<u.size();k++){
+              //std::cout << "(" << k << "," << pdx[k] << ")" << "/" ;
+            //}
+           // std::cout << "---------------------------" << std::endl;
+           for (unsigned int k=0; k<N*N;k++){
+                std::cout << "(" << k << "," << pA[k] << ")" << "/" ;
+           }
+
               //Update the xi
+              //std::cout << "------------" << std::endl;
               for (unsigned int i =0; i<=N; i++){
-                  x[i] = x[i] + step*dx[i];
+                  x[i] = x[i] + step*pdx[i];
+                 // std::cout << dx[i] << "/";
               }
+                            //std::cout << "------------" << std::endl;
+              //std::cout << "****** " << j << " ******" << std::endl;
+
+
         }
         sumBirth = 0;
         for(unsigned int i=0; i<N; i++){//size
@@ -114,39 +197,33 @@ void solver::solve_MU(unsigned int move){
                     sumBirth +=(x[k+1] - x[k]) * usedModel->beta(X(k),S)*U[k];
                 }
                 tmp1 = usedModel->g(usedModel->lengthAtBirth,S);
-                U[0] += (1/tmp1)*sumBirth;
-            }
-            else{
+                u[0] = (1/tmp1)*sumBirth;
+                U[0] = u[0];
+                u[1] = u[0];//assumption made before finding a solution to the boundary pbm
+                U[1] = u[1];
+            }else if (i==1){;}
+            else{ 
+                rMinus = (U[i]-U[i-1])*(x[i]-x[i-2])/((U[i-1]-U[i-2])*(x[i-1]-x[i-2]));
+                rPlus = (U[i-1]-U[i])*(x[i]-x[i+2])/((U[i]-U[i+1])*(x[i-1]-x[i]));
+                if(usedModel->g(x[i],S) >=0){
+                     u[i] = U[i-1] + phi(rMinus)*(U[i-1]-U[i-2])*(x[i]-x[i-1])/(x[i+1]-x[i-1]); 
+                }   
+                else{
+                    u[i] = U[i] - phi(rPlus)*(U[i+1]-U[i])*(x[i+1]-x[i])/(x[i+2]-x[i]); 
+                }
                 dUi += -usedModel->mu(X(i),S)*U[i] - (1/(x[i+1]-x[i]))*(usedModel->g(x[i+1],S)*u[i+1] -  usedModel->g(x[i],S)*u[i] );
                 if(move == 1){
-                    dUi += (1/(x[i+1]-x[i]))*(dx[i+1]*u[i+1] - dx[i]*u[i] - (dx[i+1] - dx[i])*U[i]); 
+                    dUi += (1/(x[i+1]-x[i]))*(pdx[i+1]*u[i+1] - pdx[i]*u[i] - (pdx[i+1] - pdx[i])*U[i]); 
                 }
-                
                 U[i] = U[i] + step*dUi;//for all i, we have the average distribution on each interval
             }
         }
-        //now, we calculate the density at each boundary
-        u[0] = U[0]; //cf equation (1b)
-        u[1] = u[0];//assumption made before finding a solution to the boundary pbm
-        //std::cout << u[0] << std::endl;
-        for (unsigned int i=2; i<=(N-1);i++){//still size
-            rMinus = (U[i]-U[i-1])*(x[i]-x[i-2])/((U[i-1]-U[i-2])*(x[i-1]-x[i-2]));
-            rPlus = (U[i-1]-U[i])*(x[i]-x[i+2])/((U[i]-U[i+1])*(x[i-1]-x[i]));
-            if(usedModel->g(x[i],S) >=0){
-               tmp1 = phi(rMinus)*(U[i-1]-U[i-2])*(x[i]-x[i-1])/(x[i+1]-x[i-1]); 
-                //std::cout << tmp1 << std::endl;
-               u[i] = U[i-1] + tmp1;            
-            }   
-            else{
-                u[i] = U[i] - phi(rPlus)*(U[i+1]-U[i])*(x[i+1]-x[i])/(x[i+2]-x[i]); 
-            }
-        }
         u[N] = u[N-1];//assumption made before finding a solution to the boundary pbm
-
     //must compute the new resourceDynamics S
     S = S + step*usedModel->dS(S,x,u);
-    //std::cout << j << " : " << S << std::endl;
+    std::cout << " j : " << j << std::endl;
   }
+    engClose(ep);
 }
 
 double solver::monitor(unsigned int i, double regularizingFactor){
@@ -161,6 +238,8 @@ double solver::regularizingFactor() const{
     for(unsigned int i =0; i<(u.size() - 1);i++){
         dx = x[i+1] - x[i];
         dxU = (u[i+1] - u[i])/dx;
+        //std::cout << " i : " << i << " dx : " << x[i+1] << " - " << x[i] << "dxU : " << u[i+1] << " - " << u[i] << std::endl;
+        //std::cout << integral << std::endl;
         integral += pow(dxU,2);
     }
     return (1/(usedModel->maximumLength - usedModel->lengthAtBirth))*integral;
@@ -195,61 +274,58 @@ void solver::GaussThomasAlgo(std::vector<double> a, std::vector<double> b, std::
 //     double array[u.size()];                                                       
 //     for (unsigned int i = 0; i< u.size(); ++i){                                              
 //         array[i] = u[i];                          
-//         //std::cout << "index "<< i << " : " << u[i] << std::endl;
 //     }                                                                          
 //     // Affiche le sous forme de graphique.                                     
 //     CImg<>(array,u.size()).display_graph("distribution",1); 
 //}
 
-void solver::display(){
-// Read command line argument   cimg_usage("Simple plotter of ECG signal");
- //const char *const formula = cimg_option("-f", "u", "Formula to plot");
- //const float x0 = cimg_option("-x0", 0.0f, "Minimal X-value");
- //const float x1 = cimg_option("-x1", 1.0f, "Maximal X-value");
- int sizeu = u.size();
- //const int resolution = cimg_option("-r", sizeu, "Plot resolution");
- const unsigned int nresolution = sizeu;
-// const unsigned int plot_type = cimg_option("-p", 1, "Plot type");
- //const unsigned int vertex_type = cimg_option("-v", 1, "Vertex type");
-
- // Create plot data.
- CImg<double> values(1, nresolution, 1, 1, 0);
-
- const unsigned int r = nresolution - 1;
-
- for (int i1 = 0; i1 < sizeu; ++i1)
- {
-     double xtime = i1/ r;
-         values(0, i1) = u.at(i1);
-         }  
-         // Display interactive plot window.
-         values.display_graph();
-}
-
-void solver::displayEquilibrum(){
-    double tmp,Seq, xeq,ustar;
-    std::vector<double> ueq;
-    unsigned int i = 0;
-    tmp = 0.1*(1+0.1)*(2+0.1)/(2*0.75);
-    xeq = pow(tmp,(double (1)/3));
-    std::cout << "xeq = " << xeq << std::endl;
-    Seq = xeq/(1-xeq);
-    while (x[i] <= xeq){
-        ustar = 0.75*0.5*Seq*(1-Seq/3)*pow((xeq-x[i]),0.1-1)/pow(xeq,0.1);
-        ueq.push_back(ustar);
-        i++;
-    }
-    u = ueq;
-    double array[ueq.size()];                                                       
-    for (unsigned int i = 0; i< ueq.size(); ++i){                                              
-        array[i] = ueq[i];                          
-        //std::cout << "index "<< i << " : " << ueq[i] << std::endl;
-    }                                                                          
-    // Affiche le sous forme de graphique.                                     
-    CImg<>(array,ueq.size()).display_graph("Equilibrum distribution",1); 
-
-}
-
+//void solver::display(){
+//// Read command line argument   cimg_usage("Simple plotter of ECG signal");
+// //const char *const formula = cimg_option("-f", "u", "Formula to plot");
+// //const float x0 = cimg_option("-x0", 0.0f, "Minimal X-value");
+// //const float x1 = cimg_option("-x1", 1.0f, "Maximal X-value");
+// int sizeu = u.size();
+// //const int resolution = cimg_option("-r", sizeu, "Plot resolution");
+// const unsigned int nresolution = sizeu;
+//// const unsigned int plot_type = cimg_option("-p", 1, "Plot type");
+// //const unsigned int vertex_type = cimg_option("-v", 1, "Vertex type");
+//
+// // Create plot data.
+// CImg<double> values(1, nresolution, 1, 1, 0);
+//
+// const unsigned int r = nresolution - 1;
+//
+// for (int i1 = 0; i1 < sizeu; ++i1)
+// {
+//     double xtime = i1/ r;
+//         values(0, i1) = u.at(i1);
+//         }  
+//         // Display interactive plot window.
+//         values.display_graph();
+//}
+//
+//void solver::displayEquilibrum(){
+//    double tmp,Seq, xeq,ustar;
+//    std::vector<double> ueq;
+//    unsigned int i = 0;
+//    tmp = 0.1*(1+0.1)*(2+0.1)/(2*0.75);
+//    xeq = pow(tmp,(double (1)/3));
+//    Seq = xeq/(1-xeq);
+//    while (x[i] <= xeq){
+//        ustar = 0.75*0.5*Seq*(1-Seq/3)*pow((xeq-x[i]),0.1-1)/pow(xeq,0.1);
+//        ueq.push_back(ustar);
+//        i++;
+//    }
+//    u = ueq;
+//    double array[ueq.size()];                                                       
+//    for (unsigned int i = 0; i< ueq.size(); ++i){                                              
+//        array[i] = ueq[i];                          
+//    }                                                                          
+//    // Affiche le sous forme de graphique.                                     
+//    CImg<>(array,ueq.size()).display_graph("Equilibrum distribution",1); 
+//
+//}
+//
 void solver::showContent(std::vector<double> vec){
     for(unsigned int i=0;i<vec.size();i++){
         std::cout << vec[i] << std::endl;
