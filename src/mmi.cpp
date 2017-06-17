@@ -7,19 +7,19 @@ void tokenize(const std::string &s, std::vector<std::string> &tokens) {
     std::istringstream f(s);
     std::string word;    
     while (f >> word) {
-        tokens.push_back(word);
+       tokens.push_back(word);
     }
 }
 
 double convert(std::string par){
-    char str_value[par.size()];
+    char str_value[par.size()] = "";
     for (unsigned int j=0; j<par.size();j++){ //converts a string in char* to use fonction atof
         str_value[j] = par[j];
     }
     return atof(str_value);
 }
 
-void evaluate_command(std::string line, model **usedModel, solver **solveModel, std::vector<model *> *allModels){
+void evaluate_command(std::string line, model **usedModel, solver **solveModel, std::vector<model *> *allModels, Engine *ep){
     std::vector<std::string> command;
     std::string model,parameter;
     std::string method = "";
@@ -47,7 +47,7 @@ void evaluate_command(std::string line, model **usedModel, solver **solveModel, 
             (*solveModel)->setM(convert(command[i+1]));
             i += 2;
         }else if (command[i] == "-nci"){ //Number of Class Intervals
-            (*solveModel)->setN(convert(command[i+1]));
+            (*solveModel)->setJ(convert(command[i+1]));
             i += 2;
         }else if ((command[i] ==  "-h") ||(command[i] == "-help")){
             std::cout << "here you can do ..." << std::endl;
@@ -70,7 +70,7 @@ void evaluate_command(std::string line, model **usedModel, solver **solveModel, 
                 found = false;
             }
             else{
-                (*solveModel)->solve();
+                (*solveModel)->solve(ep);
                 i += 1;
             }
         }else if(command[i] == "-initSolver"){

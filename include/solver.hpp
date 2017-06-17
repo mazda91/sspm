@@ -16,19 +16,23 @@ class solver{
 private:
     model *usedModel;
     std::string usedMethod;
-    unsigned int N = 10;//default value for the number of size range intervals
+    unsigned int J = 10;//default value for the number of size range intervals
     unsigned int M = 10;//default value for the number of time range intervals
     double Tf = 10.0; //  default value for the solver ending time 
     double temporalRegularization = 1;
     std::vector<double> U;//vector of Ui's (average of the distribution we look for on each subdivsion interval)
     std::vector<double> x;//sizeMesh  
     std::vector<double> u;//approximation of the distribution ( our solution)
+
+    std::vector<double> N;//vector of cohort abundances
     
     /** \brief Partitiones the size range into N equidistant intervals */
     void setSizeMesh();
 
     /** \brief Sets the distribution at interval boundaries with random values between 0 and 1 */
     void setInitialDistribution();
+
+    void setInitialCohorts();
 
     /** \brief Computes the regularizing factor needed in the monitor function*/
     double regularizingFactor() const; 
@@ -42,10 +46,16 @@ private:
     /** \brief Computes the solution of a linear system using Gauss-Thomas algorithm*/
     void  GaussThomasAlgo(std::vector<double> a, std::vector<double> b, std::vector<double> c, std::vector<double> d,std::vector<double> & solution);
 
+    double totalAbundance();
     /** \brief Computes the distribution through time using mesh-upwind method.*/          
-    void solve_MU(unsigned int move);    
+    void solve_MU(Engine *ep,unsigned int move);    
+    
+     /** \brief Computes the distribution through time using the Escalator BoxCar Train method.*/          
+    void solve_EBT(Engine *ep);
+    
+    int removeCohort(std::vector<double> & vecCohorts, Engine *ep);
 
-
+    void display(Engine *ep,mxArray *abscissa,mxArray *ordinates, mxArray *time);
 public:
     
     solver();
@@ -58,7 +68,7 @@ public:
     void setMethod(std::string method);
 
     /** \brief Sets N to nbSizeIntervals*/
-    void setN(unsigned int nbSizeIntervals);
+    void setJ(unsigned int nbSizeIntervals);
 
     /** \brief Sets M to nbTimeIntervals*/
     void setM(unsigned int nbTimeIntervals);
@@ -76,7 +86,7 @@ public:
     void initParameters();
 
     /** \brief Calls the solving function matching the attribute method*/
-    void solve();
+    void solve(Engine *ep);
 
     //void displayEquilibrum();
 

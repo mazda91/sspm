@@ -21,6 +21,7 @@
 #define dS resourceDynamics
 #define dR resourceDynamics
 
+#define lb lengthAtBirth
 
 struct parameter{
     std::string name;

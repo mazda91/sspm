@@ -1,4 +1,4 @@
-GXX=g++
+GXX=g++-4.9
 CFLAGS= -c  -std=c++11 -I $(matlabroot)/extern/include/ 
 WFLAGS= -Wall -Wextra
 LDFLAGS= -g
@@ -20,11 +20,11 @@ EXECTEST = $(TESTDIR)/test
 all: $(EXEC)
 	
 $(EXEC) : $(OBJFILES)
-	$(GXX) -g -o $@  $^ $(LIBS) -Wl,-rpath-link,$(matlabroot)/bin/glnxa64 
+	$(GXX) -g -o $@ $^ $(LIBS) -Wl,-rpath-link,$(matlabroot)/bin/glnxa64 
+	mex -client engine $(SRCDIR)/mexGate.cpp $^
 
 $(OBJDIR)/%.o :  $(SRCDIR)/%.cpp $(OBJDIR)  
-	$(GXX) $(CFLAGS) $(LDFLAGS) $(WFLAGS) $(LIBS)  $< -o $@
-
+	$(GXX) $(CFLAGS) $(LDFLAGS) $(WFLAGS) $< -o $@  $(LIBS)  
 	
 $(OBJFILES): | $(OBJDIR)
 

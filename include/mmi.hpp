@@ -37,6 +37,6 @@ void tokenize(const std::string &s, std::vector<std::string> &tokens);
  *  \param[in,out] allModels : contains pointers to all the models used during the execution.
  *  \todo complete options 
  */ 
-void evaluate_command(std::string line, model **usedModel, solver **solveModel,std::vector<model *> *allModels);
+void evaluate_command(std::string line, model **usedModel, solver **solveModel,std::vector<model *> *allModels, Engine *ep);
 
 #endif

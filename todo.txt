@@ -1,6 +1,15 @@
 5)problem of parameter names, must match the way the user will type a name variable in command line and the name in the class which follows camL notation"
 
+replacing the addParameters etc in model by a container
+
+enregistrer l'image finale de la solution dans un fichier
+
+dans les options : save image + laisser utilisateur entrer un nom
 for MMU, test if the sizeMesh correctly moves with the solution
+
+virer tous les chemins absolus (car changeant d un utilisateur à l'autre)
+warning message in matlab : if model changess, all previous param modifications must be done again
+think about parameter tau
 
 destructors
 
@@ -21,3 +30,6 @@ making that if lengthAtBirth > maximumLength : return errors
 ask about S0 and intital distribution
 
 make temporalRegularization modifiable
+
+
+http://pure.iiasa.ac.at/10737/1/IR-13-023.pdf to keep for the report

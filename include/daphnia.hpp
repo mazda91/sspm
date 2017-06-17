@@ -14,7 +14,6 @@
 #define mu0 naturalMortalityRate
 #define r intrinsicGrowthRateForResource
 #define K resourceCarryingCapacity
-#define lm maximumLength
 //-------------functions macros ------------------
 
 
