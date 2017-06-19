@@ -45,7 +45,7 @@ while ( (strcmp(list{command},'solve') == 0) && (strcmp(list{command},'quit') ==
             dlg_title = 'Input';
             num_lines = 1
             answer = inputdlg(prompt,dlg_title,num_lines);
-            modelPar = strcat(modelPar,' -csp ',list{command},[' ',sprintf('%s',answer{1})]);
+            modelPar = strcat(modelPar,' -cmp ',list{command},[' ',sprintf('%s',answer{1})]);
         end
     elseif (strcmp(list{command},'show a solver parameter') == 1)
         list = {' J',' M',' Tf',' tau'};

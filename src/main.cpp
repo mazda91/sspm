@@ -5,8 +5,6 @@
 #include "mex.h"
 #include <fstream>
 #include <string>
-#include <locale>
-#include <codecvt>
 #include "matrix.h"
 
 #define MAXCHAR 100000

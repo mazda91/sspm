@@ -16,8 +16,8 @@ class solver{
 private:
     model *usedModel;
     std::string usedMethod;
-    unsigned int J = 10;//default value for the number of size range intervals
-    unsigned int M = 10;//default value for the number of time range intervals
+    unsigned int J = 100;//default value for the number of size range intervals
+    unsigned int M = 100;//default value for the number of time range intervals
     double Tf = 10.0; //  default value for the solver ending time 
     double temporalRegularization = 1;
     std::vector<double> U;//vector of Ui's (average of the distribution we look for on each subdivsion interval)
@@ -56,6 +56,9 @@ private:
     int removeCohort(std::vector<double> & vecCohorts, Engine *ep);
 
     void display(Engine *ep,mxArray *abscissa,mxArray *ordinates, mxArray *time);
+
+    void compareMethods(std::vector<double> & fixedMesh, std::vector<double> & newX, std::vector<double> & u, std::vector<double> & abundance);
+
 public:
     
     solver();
@@ -77,7 +80,7 @@ public:
     void setTf(float finalTime);
 
     /** \brief Sets temporalRegularization to tau */
-    void setTemporalRegularization(double tau);
+    void setTau(double tau);
 
     /** \brief reinitialize u,U and x at each main loop*/
     void reInitialize();
@@ -92,6 +95,11 @@ public:
 
     /** \brief  Displays the content of the vector given as a parameter*/
     void showContent(std::vector<double>);
+
+    void setParameter(std::string parameter,double value);
+
+    void showParameter(std::string parameter);
+
 };
 
 #endif

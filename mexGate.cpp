@@ -1,12 +1,10 @@
-#include "../include/model.hpp"
-#include "../include/daphnia.hpp"
-#include "../include/mmi.hpp"
-#include "../include/solver.hpp"
+#include "include/model.hpp"
+#include "include/daphnia.hpp"
+#include "include/mmi.hpp"
+#include "include/solver.hpp"
 #include "mex.h"
 #include <fstream>
 #include <string>
-#include <locale>
-#include <codecvt>
 #include "matrix.h"
 
 #define MAXCHAR 100000
@@ -18,7 +16,7 @@ void mexGate(){
     model *usedModel(0);
 
     Engine *ep = engOpen("");
-    ifstream myfile("/home/mazouthm/Documents/internship/sspm/src/command1.m",ios::in);         
+    ifstream myfile("src/command1.m",ios::in);         
     char c;                                                                     
     char content[MAXCHAR];                                                      
     unsigned int i = 0;                                                         
@@ -29,13 +27,13 @@ void mexGate(){
         }                                                                       
       myfile.close();                                                         
     }    
-  //  std::cout << content << std::endl;
+    //std::cout << content << std::endl;
     while (true){
          engEvalString(ep,content);
          mxArray *mxCommand = engGetVariable(ep,"command_line");
          char* command_line =  mxArrayToString(mxCommand);
          string str(command_line);
-         cout << command_line << std::endl;
+        // cout << command_line << std::endl;
          evaluate_command(command_line, &usedModel, &solveModel, &allModels,ep);
          solveModel->reInitialize();
         //solveModel->displayEquilibrum();

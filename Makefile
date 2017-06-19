@@ -1,5 +1,5 @@
-GXX=g++-4.9
-CFLAGS= -c  -std=c++11 -I $(matlabroot)/extern/include/ 
+GXX=g++ -fPIC
+CFLAGS= -c   -std=c++11 -I $(matlabroot)/extern/include/ 
 WFLAGS= -Wall -Wextra
 LDFLAGS= -g
 LIBS= -L$(matlabroot)/bin/glnxa64 -leng -lmx -lmat
@@ -21,7 +21,7 @@ all: $(EXEC)
 	
 $(EXEC) : $(OBJFILES)
 	$(GXX) -g -o $@ $^ $(LIBS) -Wl,-rpath-link,$(matlabroot)/bin/glnxa64 
-	mex -client engine $(SRCDIR)/mexGate.cpp $^
+	mex mexGate.cpp $(LIBS)  -output $(BINDIR)/mexGate.mexa64 $^
 
 $(OBJDIR)/%.o :  $(SRCDIR)/%.cpp $(OBJDIR)  
 	$(GXX) $(CFLAGS) $(LDFLAGS) $(WFLAGS) $< -o $@  $(LIBS)  

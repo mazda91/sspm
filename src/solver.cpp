@@ -35,7 +35,7 @@ void solver::setJ(unsigned int nbSizeIntervals){
 void solver::setM(unsigned int nbTimeIntervals){this->M = nbTimeIntervals;}
 
 void solver::setTf(float finalTime){this->Tf = finalTime;}
-void solver::setTemporalRegularization(double tau){this->tau = tau;}
+void solver::setTau(double tau){this->tau = tau;}
 
 void solver::setSizeMesh(){
     x.clear(); //x of size 0
@@ -60,8 +60,9 @@ void solver::setInitialDistribution(){ //we assume that, initially, the distribu
 
 void solver::setInitialCohorts(){
     N.clear();
+    srand(time(NULL));
     for (unsigned int i = 0; i<J+1; i++){
-        N.push_back(10);
+        N.push_back(rand()%J);
     }
 }
 
@@ -74,7 +75,7 @@ void solver::reInitialize(){
 }
 
 void solver::initParameters(){
-    setJ(10);setM(10); setTf(10); tau = 1;
+    setJ(100);setM(100); setTf(100); tau = 1;
 }
 
 double phi(double r){
@@ -101,13 +102,13 @@ double solver::totalAbundance(){
 }
 void solver::solve_EBT(Engine *ep){
    double step = Tf/M; 
-   double dN0,dPi0,N0,Pi0,dNi,dxi = 0;//WARNING : do not confuse N0 and N[0]
+   double dN0,dPi0,Pi0,dNi,dxi = 0;//WARNING : do not confuse N[0] and N[0]
    double S = usedModel->S0;
    double fecundity;
    int min;
    unsigned int sizeArrays = u.size();
-
-    N0 = 0; Pi0 = 0;
+   std::vector<double> fixedMesh(x);
+    Pi0 = 0;
   
   //  //displayEquilibrum(); //set u to the equilibrum state
   //  //showContent(u);
@@ -137,12 +138,9 @@ void solver::solve_EBT(Engine *ep){
         px = (double*)mxRealloc(pxnew,sizeArrays * sizeof(double));
         mxSetPr(x_mx,px);
         for(unsigned int i=0; i< sizeArrays; i++){
-            px[i] = x[i];
+            px[i] = fixedMesh[i];
             pu[i] = u[i];
-           
         }
-
-
         engPutVariable(ep,"ti",t_mx);
         engPutVariable(ep,"x",x_mx);
         engPutVariable(ep,"u",u_mx);
@@ -150,10 +148,8 @@ void solver::solve_EBT(Engine *ep){
         engEvalString(ep,"title(sprintf('t = %0.3f',ti));");
         engEvalString(ep,"pause(Tf/M);");
 
-        //display(ep,x_mx,u_mx,t_mx);
-
         fecundity = 0;
-        dN0 = usedModel->mu(usedModel->lb,S)*N[0] - Pi0*(usedModel->mu(x[1],S) - usedModel->mu(usedModel->lb,S))/(x[1] - x [0]);
+        dN0 = -usedModel->mu(usedModel->lb,S)*N[0] - Pi0*(usedModel->mu(x[1],S) - usedModel->mu(x[0],S))/(x[1] - x [0]);
         for (unsigned int k = 0;k<sizeArrays;k++){
             fecundity += usedModel->beta(x[k],S)*N[k];
         }
@@ -161,7 +157,7 @@ void solver::solve_EBT(Engine *ep){
 
         dPi0 = usedModel->g(usedModel->lb,S)*N[0] + Pi0*(usedModel->g(x[1],S) - usedModel->g(usedModel->lb,S))/(x[1] - x [0]) - Pi0*(usedModel->mu(x[1],S) - usedModel->mu(usedModel->lb,S))/(x[1] - x [0]);
 
-        N0 = N0 + step*dN0;
+        N[0] = N[0] + step*dN0;
         Pi0 = Pi0 + step*dPi0;
 
         for (unsigned int i =0;i<sizeArrays;i++){
@@ -170,34 +166,38 @@ void solver::solve_EBT(Engine *ep){
             N[i] = N[i] + step*dNi;
             x[i] = x[i] + step*dxi;
         }
-        //reorganize cohorts
-        N.insert(N.begin(),N0);
+     //   //reorganize cohorts
+     if ((j % 10) == 0){
+        if (N[0] != 0){
+            x[0] = usedModel->lb + Pi0/N[0];
+        }
+        N.insert(N.begin(),0);
         x.insert(x.begin(),usedModel->lb);
         sizeArrays += 1;
-         if (N0 != 0){
-            x[0] = usedModel->lb + Pi0/N0;
-        }
-        u.resize(sizeArrays);
+       // u.resize(sizeArrays);
         
-        mxSetM(u_mx, sizeArrays);
-        mxSetM(x_mx, sizeArrays);
+       // mxSetM(u_mx, sizeArrays);
+       // mxSetM(x_mx, sizeArrays);
+     }
 
-    N0 = 0; Pi0 = 0;
+    //N[0] = 0; Pi0 = 0;
     min = removeCohort(N,ep);
     if (min != -1){
         x.erase(x.begin() + min);
         sizeArrays -= 1;
-        mxSetM(u_mx, sizeArrays);
-        mxSetM(x_mx, sizeArrays);
+       // mxSetM(u_mx, sizeArrays);
+       // mxSetM(x_mx, sizeArrays);
 
     }
-    u.resize(sizeArrays);
+  //  u.resize(sizeArrays);
 
         //convert cohorts abundances into a density distribution
-    for (unsigned int k =0; k<sizeArrays;k++){
+   // for (unsigned int k =0; k<sizeArrays;k++){
         //std::cout << "(" << k << "," << &N[k]  << "," << N[k] << ")" << " / ";
-        u[k] = N[k] / totalAbundance();
-    }
+     //   u[k] = N[k] / totalAbundance();
+   // }
+    compareMethods(fixedMesh,x,u,N);
+
     S = S + step* usedModel->dS(S,x,u);
 
    
@@ -209,6 +209,23 @@ void solver::solve_EBT(Engine *ep){
     mxDestroyArray(ft_mx);
 }
 
+void solver::compareMethods(std::vector<double> & fixedMesh, std::vector<double> & newX, std::vector<double> & u, std::vector<double> & abundance){
+    unsigned int cmpt;
+    double maxDiff = fixedMesh[1] - fixedMesh[0];
+    for (unsigned int i=0;i<u.size();i++){
+        u[i] = 0;
+    }
+    for (unsigned int i=0;i<u.size();i++){
+        cmpt = 0;
+        while (fabs(newX[i] - fixedMesh[cmpt]) > maxDiff){
+            cmpt += 1;
+        }
+        if (fabs(newX[i]-fixedMesh[cmpt]) > fabs(newX[i]-fixedMesh[cmpt+1])){
+            cmpt += 1;
+        } 
+        u[cmpt] += abundance[cmpt]/totalAbundance();
+    }
+}
 int solver::removeCohort(std::vector<double> &vec, Engine *ep){
     //look for the minimum
     int min = 0;
@@ -392,7 +409,34 @@ void solver::showContent(std::vector<double> vec){
     }
 }
 
-
+void solver::setParameter(std::string parameter,double value){
+    if (parameter == "Tf"){//final time                             
+        setTf(value);                   
+    }else if(parameter ==  "M"){//Number of Time Intervals          
+        setM(value);                    
+    }else if (parameter == "J"){ //Number of Class Intervals        
+        setJ(value);                    
+    }else if (parameter == "tau"){ //temporal regularization parameter
+        setTau(value);                  
+    }else{                                                             
+        std::cout << parameter << " is not a solver parameter " << std::endl;
+        exit(1);                                                                                                                    
+  }
+}
+void solver::showParameter(std::string parameter){
+    if (parameter == "Tf"){//final time                             
+        std::cout << "Tf : " << Tf << std::endl; 
+    }else if(parameter ==  "M"){//Number of Time Intervals          
+        std::cout << "M :" << M << std::endl;          
+    }else if (parameter == "J"){ //Number of Class Intervals        
+        std::cout << "J : " << J << std::endl;                  
+    }else if (parameter == "tau"){ //temporal regularization parameter
+        std::cout << "tau : " << tau << std::endl;                  
+    }else{                                                             
+        std::cout << parameter << " is not a solver parameter " << std::endl;
+        exit(1);                                                       
+  }         
+}
 //void solver::displayEquilibrum(){
 //    double tmp,Seq, xeq,ustar;
 //    std::vector<double> ueq;

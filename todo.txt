@@ -1,7 +1,12 @@
 5)problem of parameter names, must match the way the user will type a name variable in command line and the name in the class which follows camL notation"
 
+set matlab path automatically
+
 replacing the addParameters etc in model by a container
 
+the path for the file command1.m depends on from which directory matlab is opened
+
+matlab interface : quit temporalrly vs quit progmram
 enregistrer l'image finale de la solution dans un fichier
 
 dans les options : save image + laisser utilisateur entrer un nom

@@ -40,29 +40,27 @@ void evaluate_command(std::string line, model **usedModel, solver **solveModel, 
             method = command[i+1];
             (*solveModel)->setMethod(method);
             i +=2;
-        }else if (command[i] == "-ft"){//final time
-            (*solveModel)->setTf(convert(command[i+1]));
+        } else if(command[i] == "-csp"){
+            (*solveModel)->setParameter(command[i+1],convert(command[i+2]));
+            i += 3;
+        }else if (command[i] == "-cmp"){ //to change a parameter of a model which must be provided before
+            parameter = command[i+1];
+            value = convert(command[i+2]);
+            (*usedModel)->setParameter(parameter,value);
+            (*usedModel)->setAttribute(parameter,value);
+            i += 3;
+
+        }else if(command[i] == "-ssp"){//to show a solver parameter's info
+            (*solveModel)->showParameter(command[i+1]);
             i += 2;
-        }else if(command[i] ==  "-nti"){//Number of Time Intervals
-            (*solveModel)->setM(convert(command[i+1]));
-            i += 2;
-        }else if (command[i] == "-nci"){ //Number of Class Intervals
-            (*solveModel)->setJ(convert(command[i+1]));
+        }else if(command[i] == "-smp"){//to show a current model parameter's info
+            (*usedModel)->showParameter(command[i+1]);
             i += 2;
         }else if ((command[i] ==  "-h") ||(command[i] == "-help")){
             std::cout << "here you can do ..." << std::endl;
             i += 1;
         } else if ((command[i] ==  "-q") ||(command[i] == "-quit")){
             exit(0);
-        }else if (command[i] == "-cp"){ //to change a parameter of a model which must be provided before
-            parameter = command[i+1];
-            value = convert(command[i+2]);
-            (*usedModel)->setParameter(parameter,value);
-            (*usedModel)->setAttribute(parameter,value);
-            i += 3;
-        }else if(command[i] == "-sp"){//to show a parameter's info
-            (*usedModel)->showParameter(command[i+1]);
-            i += 2;
         }else if(command[i] == "-solve"){
             if ((*usedModel) == NULL){
                 std::cout << "No model defined. Can't solve." << std::endl;
