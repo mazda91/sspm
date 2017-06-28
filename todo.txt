@@ -2,6 +2,8 @@
 
 set matlab path automatically
 
+tracking C++ and Matlab memory leaks
+
 replacing the addParameters etc in model by a container
 
 the path for the file command1.m depends on from which directory matlab is opened

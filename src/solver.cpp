@@ -262,41 +262,91 @@ void solver::solve_MU(Engine *ep, unsigned int move){
     double dUi,sumBirth, rMinus, rPlus,rhoMinus, rhoPlus;
     double S = usedModel->S0;double factor;
     double tmp1;
+    double birth;
     std::vector<double> a(J+1,0);
     std::vector<double> b(J+1,0);
     std::vector<double> c(J+1,0);
     std::vector<double> d(J+1,0);
     std::vector<double> dx(J+1,0);
 
+    std::vector<double> usave(u);
     //displayEquilibrum(); //set u to the equilibrum state
     //showContent(u);
-    mxArray *u_mx = mxCreateDoubleMatrix(u.size(),1,mxREAL);
-    mxArray *dx_mx = mxCreateDoubleMatrix(u.size(),1,mxREAL);
-    mxArray *x_mx = mxCreateDoubleMatrix(u.size(),1,mxREAL);
-    mxArray *m_mx = mxCreateDoubleScalar(M);
+    mxArray *u_mx = mxCreateDoubleMatrix(J+1,1,mxREAL);
+    mxArray *dx_mx = mxCreateDoubleMatrix(J+1,1,mxREAL);
+    mxArray *x_mx = mxCreateDoubleMatrix(J+1,1,mxREAL);
+    mxArray *X_mx = mxCreateDoubleMatrix(J,1,mxREAL);
+   mxArray *m_mx = mxCreateDoubleScalar(M);
     mxArray *j_mx = mxCreateDoubleScalar(J);
     mxArray *t_mx = mxCreateDoubleScalar(0);
-    mxArray *ft_mx = mxCreateDoubleScalar(0);
+    mxArray *ft_mx = mxCreateDoubleScalar(Tf);
 
+    mxArray *size_mx = mxCreateDoubleScalar(0);
+    mxArray *S_mx = mxCreateDoubleScalar(S);
     double *pu = mxGetPr(u_mx);
     double *pdx= mxGetPr(dx_mx);
     double *px = mxGetPr(x_mx);
-    double *pm = mxGetPr(m_mx);
+    double *pX = mxGetPr(X_mx);
+   double *pm = mxGetPr(m_mx);
     double *pj = mxGetPr(j_mx);
     double *pt = mxGetPr(t_mx);
     double *pft = mxGetPr(ft_mx);
 
+    double *psize = mxGetPr(size_mx);
+    double *pS = mxGetPr(S_mx);
+    double *birthArray,*mortalityArray,*growthArray;
     pft[0] = Tf;
     pm[0] = M;
     pj[0]=J;
+
+
+    engPutVariable(ep,"size",size_mx);
+    engPutVariable(ep,"S",S_mx);
     engPutVariable(ep,"Tf",ft_mx);
     engPutVariable(ep,"M",m_mx);
     engPutVariable(ep,"J",j_mx); 
-    for(unsigned int j =0; j<M; j++){//time
+    for(unsigned int j =0; j<2; j++){//time
+        //-------------------- setting all the data necessary to matlab calculus ---------------------------------
+        // time / space grid / distribution /vector of mid-nodes
         pt[0] = j*step;
-        for(unsigned int i=0; i< u.size(); i++){
+        for (unsigned int i = 0;i<J;i++){
+            pX[i] = X(i);
             px[i] = x[i];
             pu[i] = u[i];
+        }
+
+        px[J] = x[J];
+        pu[J] = u[J];
+       
+        //Matlab call, one time for the whole vector to limit the number of calls
+        //growth rate
+         engPutVariable(ep,"x",x_mx);
+        mxSetPr(x_mx,px);mxSetPr(S_mx,pS);
+       engEvalString(ep,"growthRate(x,S);");
+        growthArray = mxGetPr(engGetVariable(ep,"ans"));
+       for (unsigned int i=0;i<=J;i++){
+            //std::cout << "(" << (growthArray[i] == usedModel->g(x[i],S)) << "," << growthArray[i] - usedModel->g(x[i],S) << ")" << "/";
+           std::cout << growthArray[i] << "/";
+       }
+       std::cout << std::endl;
+
+        //birth rate
+        engPutVariable(ep,"X",X_mx);
+        mxSetPr(X_mx,pX);mxSetPr(S_mx,pS);
+        engEvalString(ep,"birthRate(X,S);");
+        birthArray = mxGetPr(engGetVariable(ep,"ans"));
+        //birth = mxGetScalar(engGetVariable(ep,"ans"));
+
+        //mortality rate
+       engEvalString(ep,"mortalityRate(x,S);");
+        mortalityArray = mxGetPr(engGetVariable(ep,"ans"));
+
+        //environment
+        //must compute the new resourceDynamics S
+        S = S + step*usedModel->dS(S,x,usave);
+        engPutVariable(ep,"S",S_mx);
+
+        for(unsigned int i=0; i< J+1; i++){
         }
         display(ep,x_mx,u_mx,t_mx);
         //FIRST WE compute the variations of xi's
@@ -319,21 +369,21 @@ void solver::solve_MU(Engine *ep, unsigned int move){
             //update the array related to MAtlab engine
             for (unsigned k=0;k<=J; k++){
                 pdx[k] = dx[k];
-            }
+                x[k] = x[k] + step*pdx[k];
+           }
             engPutVariable(ep,"dx",dx_mx);
-              //Update the xi
-              for (unsigned int i =0; i<=J; i++){
-                  x[i] = x[i] + step*pdx[i];
-              }
         }
         sumBirth = 0;
         for(unsigned int i=0; i<J; i++){//size
             dUi=0;
             if(i==0){ //taking into account equation (1b) : newborn individuals
                 for(unsigned int k=0;k<J; k++){
-                    sumBirth +=(x[k+1] - x[k]) * usedModel->beta(X(k),S)*U[k];
-                }
-                tmp1 = usedModel->g(usedModel->lengthAtBirth,S);
+                     //sumBirth +=(x[k+1] - x[k]) * usedModel->beta(X(k),S)*U[k];
+                     //std::cout << birthArray[k] << "/" ; 
+                    sumBirth +=(x[k+1] - x[k]) * birthArray[k]*U[k];
+               }
+               // tmp1 = usedModel->g(usedModel->lengthAtBirth,S);
+                tmp1 = growthArray[0];
                 u[0] = (1/tmp1)*sumBirth;
                 U[0] = u[0];
                 u[1] = u[0];//assumption made before finding a solution to the boundary pbm
@@ -342,23 +392,24 @@ void solver::solve_MU(Engine *ep, unsigned int move){
             else{ 
                 rMinus = (U[i]-U[i-1])*(x[i]-x[i-2])/((U[i-1]-U[i-2])*(x[i-1]-x[i-2]));
                 rPlus = (U[i-1]-U[i])*(x[i]-x[i+2])/((U[i]-U[i+1])*(x[i-1]-x[i]));
-                if(usedModel->g(x[i],S) >=0){
+                //if(usedModel->g(x[i],S) - dx[i] >=0){
+                if(growthArray[i] - dx[i] >=0){
                      u[i] = U[i-1] + phi(rMinus)*(U[i-1]-U[i-2])*(x[i]-x[i-1])/(x[i+1]-x[i-1]); 
                 }   
                 else{
                     u[i] = U[i] - phi(rPlus)*(U[i+1]-U[i])*(x[i+1]-x[i])/(x[i+2]-x[i]); 
                 }
-                dUi += -usedModel->mu(X(i),S)*U[i] - (1/(x[i+1]-x[i]))*(usedModel->g(x[i+1],S)*u[i+1] -  usedModel->g(x[i],S)*u[i] );
+                dUi += -mortalityArray[i]*U[i] - (1/(x[i+1]-x[i]))*(usedModel->g(x[i+1],S)*usave[i+1] -  usedModel->g(x[i],S)*usave[i] );
                 if(move == 1){
-                    dUi += (1/(x[i+1]-x[i]))*(pdx[i+1]*u[i+1] - pdx[i]*u[i] - (pdx[i+1] - pdx[i])*U[i]); 
+                    dUi += (1/(x[i+1]-x[i]))*(pdx[i+1]*usave[i+1] - pdx[i]*usave[i] - (pdx[i+1] - pdx[i])*U[i]); 
                 }
                 U[i] = U[i] + step*dUi;//for all i, we have the average distribution on each interval
             }
         }
         u[J] = u[J-1];//assumption made before finding a solution to the boundary pbm
-    //must compute the new resourceDynamics S
-    S = S + step*usedModel->dS(S,x,u);
+        usave = u;
   }
+    mxDestroyArray(S_mx);mxDestroyArray(size_mx);
     mxDestroyArray(u_mx);mxDestroyArray(dx_mx);mxDestroyArray(x_mx);
     mxDestroyArray(t_mx);mxDestroyArray(j_mx);mxDestroyArray(m_mx);
     mxDestroyArray(ft_mx);
