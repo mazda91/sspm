@@ -1,5 +1,9 @@
 5)problem of parameter names, must match the way the user will type a name variable in command line and the name in the class which follows camL notation"
 
+
+https://stackoverflow.com/questions/18660433/matlab-mex-file-with-mexcallmatlab-is-almost-300-times-slower-than-the-correspon
+site with a possible solution to pass a function_handle as an input (to test if performances are better than evalString)
+
 set matlab path automatically
 
 tracking C++ and Matlab memory leaks

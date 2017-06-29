@@ -1,5 +1,4 @@
 #include "include/model.hpp"
-#include "include/daphnia.hpp"
 #include "include/mmi.hpp"
 #include "include/solver.hpp"
 #include "mex.h"
@@ -11,9 +10,9 @@
 using namespace std;
 
 void mexGate(){
-    std::vector<model *> allModels;//saves all the models allocations done in evaluate_command in case the user decides to change the usedModel during the utilisation : we need to delete them all at the end and not only the last model allocated
     solver *solveModel = new solver();
-    model *usedModel(0);
+    model *usedModel = new model();
+    solveModel->setModel(usedModel);
 
     Engine *ep = engOpen("");
     ifstream myfile("src/command1.m",ios::in);         
@@ -34,17 +33,13 @@ void mexGate(){
          char* command_line =  mxArrayToString(mxCommand);
          string str(command_line);
         // cout << command_line << std::endl;
-         evaluate_command(command_line, &usedModel, &solveModel, &allModels,ep);
+         evaluate_command(command_line, &usedModel, &solveModel,ep);
          solveModel->reInitialize();
         //solveModel->displayEquilibrum();
 
          mxDestroyArray(mxCommand);
     }
  
-    //}
-    for (unsigned int i=0;i<allModels.size();i++){
-        delete allModels[allModels.size()-1-i];
-    }
     engClose(ep);
     delete solveModel;
 }
@@ -55,17 +50,17 @@ void mexGate(){
 void mexFunction(int nlhs, mxArray* plhs[],int nrhs, const mxArray* prhs[]) {
 
 //    /* Check for proper number of arguments */
-//    if(nrhs != 0) {
-//        mexErrMsgIdAndTxt("MATLAB:mexcpp:nargin","MEXCPP requires no input arguments.");
-//    }
-//    if(nlhs != 0){
-//        mexErrMsgIdAndTxt("MATLAB:mexcpp:nargin","MEXCPP requires no output argument.");
-//    }
+    if(nrhs != 0) {
+        mexErrMsgIdAndTxt("MATLAB:mexcpp:nargin","MEXCPP requires no input arguments.");
+    }
+    if(nlhs != 0){
+        mexErrMsgIdAndTxt("MATLAB:mexcpp:nargin","MEXCPP requires no output argument.");
+    }
 //
 //    /* Check if the input is of proper type */
 //    if(!mxIsChar(prhs[0])){
 //           mexErrMsgIdAndTxt("MATLAB:mexcpp:typeargin","Argument has to be a char array.");
-//    }
+  //  }
 //
      /* Acquire pointers to the input data */
      mexGate();

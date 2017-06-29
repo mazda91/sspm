@@ -12,14 +12,9 @@
 #include <math.h>
 
 
-#define g individualGrowthRate
-#define beta individualBirthRate
-#define mu individualMortalityRate
 //#define x size
 #define t time
 #define S0 initResourceAvailable
-#define dS resourceDynamics
-#define dR resourceDynamics
 
 #define lb lengthAtBirth
 
@@ -43,28 +38,16 @@ public:
 
      model();
      model(double lengthAtBirth, double maximumLength, double initResourceAvailable);
-     virtual ~model();
+     ~model();
 
      /** \brief set parameters to a default value*/
-    virtual void defaultParameters() =0;
-
-    /** \brief computes the variation of resources during dt given the available resources S and the size-population distribution */
-    virtual double resourceDynamics(double resource, std::vector<double> &mesh, std::vector<double> &distribution) = 0;
-
-    /** \brief computes the growth rate of a size size-individual given the available resources S */
-    virtual double individualGrowthRate(double size, double S) const = 0;           
-
-    /** \brief computes the mortality rate of a size size-individual given the available resources S */
-    virtual double individualMortalityRate(double size, double S) const = 0;
-
-    /** \brief computes the fecundity rate of a size size-individual given the available resources S */
-    virtual double individualBirthRate(double size, double S) const  = 0;
+     void defaultParameters();
 
     /** \brief set the parameter attributeName to value*/
-    virtual void setAttribute(std::string attirbuteName, double value)=0;
+     void setAttribute(std::string attirbuteName, double value);
 
     /** \brief displays all the attributes with their value */
-    virtual void showAttributeList() const=0;
+     void showAttributeList() const;
 
     void setParameter(std::string parameterName, double value);
     parameter & getParameter(std::string parameterName);

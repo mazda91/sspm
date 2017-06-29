@@ -19,7 +19,7 @@ double convert(std::string par){
     return atof(str_value);
 }
 
-void evaluate_command(std::string line, model **usedModel, solver **solveModel, std::vector<model *> *allModels, Engine *ep){
+void evaluate_command(std::string line, model **usedModel, solver **solveModel, Engine *ep){
     std::vector<std::string> command;
     std::string model,parameter;
     std::string method = "";
@@ -28,15 +28,7 @@ void evaluate_command(std::string line, model **usedModel, solver **solveModel, 
     tokenize(line,command);
     unsigned int i = 0;
     while ((i < command.size()) && (found == true)){
-        if (command[i] == "-model"){
-            model = command[i+1];
-            if ((model == "daphnia") || (model == "Daphnia")){
-               *usedModel = new daphnia();
-            }           
-            allModels->push_back(*usedModel);
-            (*solveModel)->setModel(*usedModel);
-            i += 2;
-        } else if (command[i] == "-method"){
+        if (command[i] == "-method"){
             method = command[i+1];
             (*solveModel)->setMethod(method);
             i +=2;
@@ -75,15 +67,8 @@ void evaluate_command(std::string line, model **usedModel, solver **solveModel, 
             (*solveModel)->initParameters();
             i += 1;
         }else if(command[i] == "-initModel"){
-            if ((*usedModel) == NULL){
-                std::cout << "No model defined. Can't initialize." << std::endl;
-                std::cout << "All the information provided after '" << command[i] << "'have not been taken into account." << std::endl;
-                found = false;
-            }
-            else{
-                (*usedModel)->defaultParameters();
-                i += 1;
-            }
+            (*usedModel)->defaultParameters();
+            i += 1;
         }else{
             std::cout << "command " << command[i] << " not found. Type -h or -help for further information " << std::endl;
             std::cout << "All the information provided after '" << command[i] << "'have not been taken into account." << std::endl;

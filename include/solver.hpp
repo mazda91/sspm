@@ -41,7 +41,7 @@ private:
     double monitor(unsigned int i, double regularizingFactor);
 
     /** \brief Computes the middle size of the k-th interval*/
-    inline double X(unsigned int k){return (x[k]+x[k+1])/2;}
+    inline double X(std::vector<double> x, unsigned int k){return (x[k]+x[k+1])/2;}
 
     /** \brief Computes the solution of a linear system using Gauss-Thomas algorithm*/
     void  GaussThomasAlgo(std::vector<double> a, std::vector<double> b, std::vector<double> c, std::vector<double> d,std::vector<double> & solution);

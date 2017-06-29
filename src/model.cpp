@@ -14,6 +14,25 @@ model::model(double lengthAtBirth, double maximumLength, double initResourceAvai
 model::~model(){}
 
 
+void model::defaultParameters(){
+    setParameters.clear();
+    addParameter("lengthAtBirth", 0, "mm");
+    addParameter("maximumLength ", 1  ,"mm ");
+    addParameter("initResourceAvailable",10,"cell.m^-1 ");
+}
+void model::setAttribute(std::string attributeName, double value){
+   if(attributeName == "lengthAtBirth"){
+       lengthAtBirth = value;
+   }else if (attributeName == "maximumLength"){
+       maximumLength = value;
+   }
+}
+
+void model::showAttributeList() const{
+    std::cout << "length at birth : " << this->lengthAtBirth << std::endl;
+    std::cout << "maximum length : " << this->maximumLength << std::endl;
+}
+
 //in the vector of parameters
 void model::setParameter(std::string parameterName, double value){
     getParameter(parameterName).value = value;

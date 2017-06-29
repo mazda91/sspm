@@ -10,7 +10,6 @@
 #include <map>
 #include <vector>
 #include "model.hpp"
-#include "daphnia.hpp"
 #include "solver.hpp"
 
 /** \brief Converts a string into the corresponding double number.
@@ -34,9 +33,8 @@ void tokenize(const std::string &s, std::vector<std::string> &tokens);
  *  \param[in]          line : string corresponding to the command line
  *  \param[in,out] usedModel : pointer to the model type instance to deal with.
  *  \param[in,out] solver    : pointer to a solver instance.
- *  \param[in,out] allModels : contains pointers to all the models used during the execution.
  *  \todo complete options 
  */ 
-void evaluate_command(std::string line, model **usedModel, solver **solveModel,std::vector<model *> *allModels, Engine *ep);
+void evaluate_command(std::string line, model **usedModel, solver **solveModel, Engine *ep);
 
 #endif
