@@ -48,6 +48,7 @@ public:
 
     /** \brief displays all the attributes with their value */
      void showAttributeList() const;
+    double dS(double S, std::vector<double> &x, std::vector<double> &u) ;
 
     void setParameter(std::string parameterName, double value);
     parameter & getParameter(std::string parameterName);

@@ -4,14 +4,16 @@
  *@todo : resize the vectors x,u and U if J changes
  *
  */
-solver::solver(){
+solver::solver(Engine *ep){
+    this->ep = ep;
     this->x = std::vector<double>();
-    setInitialDistribution();
-    setInitialCohorts();
 }
 
 solver::~solver(){}
 
+void solver::setEngine(Engine *ep){
+    this->ep = ep;
+}
 
 void solver::setModel(model *model){
     this->usedModel = model;
@@ -27,9 +29,9 @@ void solver::setJ(unsigned int nbSizeIntervals){
     u.clear();
     U.clear();
     this->J = nbSizeIntervals;
+    setSizeMesh();
     setInitialDistribution();
     setInitialCohorts();
-    setSizeMesh();
 }
 
 void solver::setM(unsigned int nbTimeIntervals){this->M = nbTimeIntervals;}
@@ -43,19 +45,36 @@ void solver::setSizeMesh(){
    for (unsigned int i=0; i<= this->J ;i++){
        x.push_back(i*stepSize); 
    }
-
+    setInitialDistribution();
+    setInitialCohorts();
 }
 
 void solver::setInitialDistribution(){ //we assume that, initially, the distribution is equal between classes
-    srand(time(NULL));
     u.clear(); U.clear();
-    double randVal;
-    for (unsigned int i=0; i<J;i++){
-        randVal = (double (rand()%J))/J;
-        U.push_back(randVal);
-        u.push_back(randVal);
+    mxArray *x_mx = mxCreateDoubleMatrix(J+1,1,mxREAL); //mesh array
+    double *px = mxGetPr(x_mx);
+    for (unsigned int i = 0;i<=J;i++){
+        px[i] = x[i];
     }
-    u.push_back((double (rand()%J))/J);
+    engPutVariable(ep,"x",x_mx);
+
+    engEvalString(ep,"[E0,u0] = init(x)");
+    double *u0Array = mxGetPr(engGetVariable(ep,"u0"));
+    for (unsigned int i =0; i< J;i++){
+       U.push_back(u0Array[i]);
+       u.push_back(u0Array[i]);
+    }
+    u.push_back(u0Array[J]);
+//    srand(time(NULL));
+//    u.clear(); U.clear();
+//    double tmp1;
+//    for (unsigned int i=0; i<J;i++){
+//        tmp1 = (double (rand()%J))/J;
+//        U.push_back(tmp1);
+//        u.push_back(tmp1);
+//    }
+//    u.push_back((double (rand()%J))/J);
+
 }
 
 void solver::setInitialCohorts(){
@@ -67,15 +86,16 @@ void solver::setInitialCohorts(){
 }
 
 void solver::reInitialize(){
-    setInitialDistribution();
-    setInitialCohorts();
     if (this->usedModel != NULL){
         setSizeMesh();
     }
+    setInitialDistribution();
+    setInitialCohorts();
+
 }
 
 void solver::initParameters(){
-    setJ(100);setM(100); setTf(100); tau = 1;
+    setJ(100);setM(100); setTf(100); setTau(1);
 }
 
 double phi(double r){
@@ -83,13 +103,13 @@ double phi(double r){
 }
 
 
-void solver::solve(Engine *ep){
+void solver::solve(){
     if (this->usedMethod == "FMU"){
-        solve_MU(ep,0);
+        solve_MU(0);
     }else if (this->usedMethod == "MMU"){
-        solve_MU(ep,1);
+        solve_MU(1);
     }else if (this->usedMethod == "EBT"){
-        solve_EBT(ep);
+        solve_EBT();
     }
 }
 
@@ -100,7 +120,7 @@ double solver::totalAbundance(){
     }
     return res;
 }
-void solver::solve_EBT(Engine *ep){
+void solver::solve_EBT(){
    double step = Tf/M; 
    double dN0,dPi0,Pi0,dNi,dxi = 0;//WARNING : do not confuse N[0] and N[0]
    double S = usedModel->S0;
@@ -145,7 +165,7 @@ void solver::solve_EBT(Engine *ep){
             px[i] = fixedMesh[i];
             pu[i] = u[i];
         }
-        display(ep,x_mx,u_mx,t_mx);
+        display(x_mx,u_mx,t_mx);
 
 
         //Matlab life-processes functions call, one time for the whole vector to limit the number of calls
@@ -196,7 +216,7 @@ void solver::solve_EBT(Engine *ep){
        // mxSetM(x_mx, sizeArrays);
 
     //N[0] = 0; Pi0 = 0;
-    min = removeCohort(N,ep);
+    min = removeCohort(N);
     if (min != -1){
         x.erase(x.begin() + min);
         sizeArrays -= 1;
@@ -218,7 +238,7 @@ void solver::solve_EBT(Engine *ep){
     *pS = S;
     engPutVariable(ep,"S",S_mx);
     engEvalString(ep,"environment(x,u,S);");
-    std::cout << mxGetScalar(engGetVariable(ep,"S")) << std::endl;
+//    std::cout << mxGetScalar(engGetVariable(ep,"S")) << std::endl;
 
    
    }
@@ -246,7 +266,7 @@ void solver::compareMethods(std::vector<double> & fixedMesh, std::vector<double>
         u[cmpt] += abundance[cmpt]/totalAbundance();
     }
 }
-int solver::removeCohort(std::vector<double> &vec, Engine *ep){
+int solver::removeCohort(std::vector<double> &vec){
     //look for the minimum
     int min = 0;
     for (unsigned int i = 1; i<vec.size(); i++){
@@ -262,7 +282,7 @@ int solver::removeCohort(std::vector<double> &vec, Engine *ep){
     return -1;
 }
 
-void solver::display(Engine *ep,mxArray *mesh,mxArray *distribution, mxArray *time){
+void solver::display(mxArray *mesh,mxArray *distribution, mxArray *time){
    engPutVariable(ep,"ti",time);
    engPutVariable(ep,"x",mesh);
    engPutVariable(ep,"u",distribution);
@@ -277,7 +297,7 @@ void solver::display(Engine *ep,mxArray *mesh,mxArray *distribution, mxArray *ti
  *@todo changing the values for u[1], u[J-1] and u[J] after finding a solution to the boundary value pbl
  *
  */
-void solver::solve_MU(Engine *ep, unsigned int move){
+void solver::solve_MU(unsigned int move){
     double step = ((double) Tf)/M; 
     double S,dUi,sumBirth, rMinus, rPlus,rhoMinus, rhoPlus;
     double factor;
@@ -320,9 +340,9 @@ void solver::solve_MU(Engine *ep, unsigned int move){
     engPutVariable(ep,"J",j_mx); 
 
     engPutVariable(ep,"x",x_mx);
-    engEvalString(ep,"init(x);");
-    S = *mxGetPr(engGetVariable(ep,"ans"));
-    std::cout << usedModel->S0 << std::endl;
+    engEvalString(ep,"[E0,u0] = init(x);");
+    usedModel->S0 = *mxGetPr(engGetVariable(ep,"E0"));//not getScalar because environment can be multidimensional
+    //std::cout << usedModel->S0 << std::endl;
     mxArray *S_mx = mxCreateDoubleScalar(usedModel->S0);//resource available
 
     double *pS = mxGetPr(S_mx);
@@ -332,17 +352,24 @@ void solver::solve_MU(Engine *ep, unsigned int move){
     //init the vector of midpoints mesh before loop (because won't change for FMU so no need to update in the loop)
     for (unsigned int i = 0;i<J;i++){
         pX[i] = X(x,i);
+        px[i] = x[i];
+
+        //std::cout << "(" << pX[i] << "," << (x[i+1] + x[i])/2 << ")" << "/";
     }
-    for(unsigned int j =0; j<M; j++){//time
+    px[J] = x[J];
+
+    for(unsigned int j =0; j<=M; j++){//time
+        //std::cout << "-------------------- " << j << " --------------" << std::endl;
         //-------------------- setting all the data necessary to matlab calculus ---------------------------------
         // time / space grid / distribution /vector of mid-nodes
         pt[0] = j*step;
         for (unsigned int i = 0;i<J;i++){
-            if (move == 1){//if MMU, update the midpoints mesh 
+            if (move == 1){//if MMU, update the points meshes 
                 pX[i] = X(x,i);
+                px[i] = x[i];
             }
-            px[i] = x[i];
             pu[i] = u[i];
+            //std::cout << u[i] << "/";
         }
         px[J] = x[J];
         pu[J] = u[J];
@@ -363,7 +390,7 @@ void solver::solve_MU(Engine *ep, unsigned int move){
         mortalityArray = mxGetPr(engGetVariable(ep,"ans"));
 
         
-        display(ep,x_mx,u_mx,t_mx);
+        display(x_mx,u_mx,t_mx);
 
         if(move==1){//FIRST WE compute the variations of xi's if MMU
             factor = regularizingFactor();
@@ -423,10 +450,9 @@ void solver::solve_MU(Engine *ep, unsigned int move){
 
         //environment
         //must compute the new resourceDynamics S
-        *pS = S;
+        engEvalString(ep,"environment(x,u,S,Tf,M);");
+       *pS = mxGetScalar(engGetVariable(ep,"ans"));
         engPutVariable(ep,"S",S_mx);
-        engEvalString(ep,"environment(x,u,S);");
-        std::cout << mxGetScalar(engGetVariable(ep,"S")) << std::endl;
 
         u[J] = u[J-1];//assumption made before finding a solution to the boundary pbm
         usave = u;

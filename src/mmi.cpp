@@ -19,7 +19,7 @@ double convert(std::string par){
     return atof(str_value);
 }
 
-void evaluate_command(std::string line, model **usedModel, solver **solveModel, Engine *ep){
+void evaluate_command(std::string line, model **usedModel, solver **solveModel){
     std::vector<std::string> command;
     std::string model,parameter;
     std::string method = "";
@@ -60,7 +60,7 @@ void evaluate_command(std::string line, model **usedModel, solver **solveModel, 
                 found = false;
             }
             else{
-                (*solveModel)->solve(ep);
+                (*solveModel)->solve();
                 i += 1;
             }
         }else if(command[i] == "-initSolver"){

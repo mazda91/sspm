@@ -10,11 +10,12 @@
 using namespace std;
 
 void mexGate(){
-    solver *solveModel = new solver();
+    Engine *ep = engOpen("");
+    engEvalString(ep,"nbLoops = 0;");
+    solver *solveModel = new solver(ep);
     model *usedModel = new model();
     solveModel->setModel(usedModel);
 
-    Engine *ep = engOpen("");
     ifstream myfile("src/command1.m",ios::in);         
     char c;                                                                     
     char content[MAXCHAR];                                                      
@@ -33,7 +34,7 @@ void mexGate(){
          char* command_line =  mxArrayToString(mxCommand);
          string str(command_line);
         // cout << command_line << std::endl;
-         evaluate_command(command_line, &usedModel, &solveModel,ep);
+         evaluate_command(command_line, &usedModel, &solveModel);
          solveModel->reInitialize();
         //solveModel->displayEquilibrum();
 

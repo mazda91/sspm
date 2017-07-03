@@ -24,6 +24,7 @@ private:
     std::vector<double> x;//sizeMesh  
     std::vector<double> u;//approximation of the distribution ( our solution)
 
+    Engine *ep;
     std::vector<double> N;//vector of cohort abundances
     
     /** \brief Partitiones the size range into N equidistant intervals */
@@ -48,22 +49,23 @@ private:
 
     double totalAbundance();
     /** \brief Computes the distribution through time using mesh-upwind method.*/          
-    void solve_MU(Engine *ep,unsigned int move);    
+    void solve_MU(unsigned int move);    
     
      /** \brief Computes the distribution through time using the Escalator BoxCar Train method.*/          
-    void solve_EBT(Engine *ep);
+    void solve_EBT();
     
-    int removeCohort(std::vector<double> & vecCohorts, Engine *ep);
+    int removeCohort(std::vector<double> & vecCohorts);
 
-    void display(Engine *ep,mxArray *abscissa,mxArray *ordinates, mxArray *time);
+    void display(mxArray *abscissa,mxArray *ordinates, mxArray *time);
 
     void compareMethods(std::vector<double> & fixedMesh, std::vector<double> & newX, std::vector<double> & u, std::vector<double> & abundance);
 
 public:
     
-    solver();
+    solver(Engine *ep);
     ~solver();
     
+    void setEngine(Engine *ep);
     /** \brief Sets the pointer to the model instance to deal with.  */
     void setModel(model *model);
 
@@ -89,7 +91,7 @@ public:
     void initParameters();
 
     /** \brief Calls the solving function matching the attribute method*/
-    void solve(Engine *ep);
+    void solve();
 
     //void displayEquilibrum();
 
