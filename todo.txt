@@ -1,6 +1,3 @@
-5)problem of parameter names, must match the way the user will type a name variable in command line and the name in the class which follows camL notation"
-
-
 https://stackoverflow.com/questions/18660433/matlab-mex-file-with-mexcallmatlab-is-almost-300-times-slower-than-the-correspon
 site with a possible solution to pass a function_handle as an input (to test if performances are better than evalString)
 
@@ -8,7 +5,6 @@ set matlab path automatically
 
 tracking C++ and Matlab memory leaks
 
-replacing the addParameters etc in model by a container
 
 the path for the file command1.m depends on from which directory matlab is opened
 
@@ -19,16 +15,12 @@ dans les options : save image + laisser utilisateur entrer un nom
 for MMU, test if the sizeMesh correctly moves with the solution
 
 virer tous les chemins absolus (car changeant d un utilisateur à l'autre)
-warning message in matlab : if model changess, all previous param modifications must be done again
 think about parameter tau
 
 destructors
 
 portability of the code, makefile
 documentation of the code
-reinitialize u, U and x at each main loop
-At the first place : assume that variable names are perfectly typed
-NB : engPutVarariable must be typed once the variable has been updated
 
 prove that GaussThomasAlgo is stable in our case( dominant matrix)
 
@@ -36,11 +28,11 @@ prove that GaussThomasAlgo is stable in our case( dominant matrix)
 
 destroy arrays in engine
 
-making that if lengthAtBirth > maximumLength : return errors
-
-ask about S0 and intital distribution
-
-make temporalRegularization modifiable
-
 
 http://pure.iiasa.ac.at/10737/1/IR-13-023.pdf to keep for the report
+
+--------------Parameter stuffs --------------
+specify parameters
+making that if lengthAtBirth > maximumLength : return errors
+replacing the addParameters etc in model by a container
+

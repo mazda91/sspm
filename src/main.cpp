@@ -14,7 +14,7 @@ int main() {
     engEvalString(ep,"cd ../src");
 
     std::string line;
-    model *usedModel = new model(0,1,10);
+    model *usedModel = new model(0,1);
     solver *solveModel = new solver(ep);
     solveModel->setModel(usedModel);
 

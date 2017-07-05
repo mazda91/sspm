@@ -5,13 +5,11 @@
 model::model(){ defaultParameters();}
 
 
-model::model(double lengthAtBirth, double maximumLength, double initResourceAvailable){
+model::model(double lengthAtBirth, double maximumLength){
     this->lengthAtBirth = lengthAtBirth;
     this->maximumLength = maximumLength;
-    this->initResourceAvailable = initResourceAvailable;
     addParameter("lengthAtBirth", lengthAtBirth, "mm");
     addParameter("maximumLength ", maximumLength  ,"mm ");
-    addParameter("initResourceAvailable",initResourceAvailable,"cell.m^-1 ");
 
 }
 
@@ -23,10 +21,8 @@ void model::defaultParameters(){
     setParameters.clear();
     this->lengthAtBirth = 0;
     this->maximumLength = 1;
-    this->initResourceAvailable = 10;
     addParameter("lengthAtBirth", 0, "mm");
     addParameter("maximumLength ", 1  ,"mm ");
-    addParameter("initResourceAvailable",10,"cell.m^-1 ");
 }
 
 void model::setAttribute(std::string attributeName, double value){

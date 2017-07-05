@@ -14,7 +14,6 @@
 
 //#define x size
 #define t time
-#define S0 initResourceAvailable
 
 #define lb lengthAtBirth
 
@@ -34,10 +33,9 @@ protected:
 public:
      double lengthAtBirth;
      double maximumLength; 
-     double initResourceAvailable;
 
      model();
-     model(double lengthAtBirth, double maximumLength, double initResourceAvailable);
+     model(double lengthAtBirth, double maximumLength);
      ~model();
 
      /** \brief set parameters to a default value*/

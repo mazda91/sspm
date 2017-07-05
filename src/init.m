@@ -7,6 +7,6 @@ function[E0,u0]= init(x)
     %%have required toolbox installed
     mean = 1/2;
     sigma = 0.1;
-    u0 = 0.25*(1/(sigma*sqrt(2*pi)))*exp(-((x-mean).^2)/(2*sigma^2));
-    %u0 = rand(nbCols,1);
+    %u0 = 0.25*(1/(sigma*sqrt(2*pi)))*exp(-((x-mean).^2)/(2*sigma^2));
+    u0 = rand(nbCols,1);
 end

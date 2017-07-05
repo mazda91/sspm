@@ -12,6 +12,13 @@
 #define phi superbeeFluxLimiter
 #define tau temporalRegularization
 
+struct cohort{
+    double abundance;
+    double xmin;
+    double xnode;
+    double xmax;
+};
+
 class solver{
 private:
     model *usedModel;
@@ -54,11 +61,11 @@ private:
      /** \brief Computes the distribution through time using the Escalator BoxCar Train method.*/          
     void solve_EBT();
     
-    int removeCohort(std::vector<double> & vecCohorts);
+    int removeCohort();
 
     void display(mxArray *abscissa,mxArray *ordinates, mxArray *time);
 
-    void compareMethods(std::vector<double> & fixedMesh, std::vector<double> & newX, std::vector<double> & u, std::vector<double> & abundance);
+    void compareMethods(std::vector<cohort> & fixedMesh, std::vector<double> & newX, std::vector<double> & u, std::vector<double> & abundance);
 
 public:
     
