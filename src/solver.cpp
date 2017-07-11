@@ -41,9 +41,18 @@ void solver::setTau(double tau){this->tau = tau;}
 
 void solver::setSizeMesh(){
     x.clear(); //x of size 0
+    mxArray *x_mx = mxCreateDoubleMatrix(J+1,1,mxREAL); //mesh array
+    double *px = mxGetPr(x_mx);
+
+    engPutVariable(ep,"x",x_mx);
+
+    engEvalString(ep,"[lengthAtBirth,maximumLength,E0,u0] = init(x)");
+    this->usedModel->lengthAtBirth= mxGetScalar(engGetVariable(ep,"lengthAtBirth"));
+    this->usedModel->maximumLength= mxGetScalar(engGetVariable(ep,"maximumLength"));
+
    double stepSize = (this->usedModel->maximumLength - this->usedModel->lengthAtBirth)/this->J;
    for (unsigned int i=0; i<= this->J ;i++){
-       x.push_back(i*stepSize); 
+       x.push_back(this->usedModel->lengthAtBirth + i*stepSize); 
    }
     setInitialDistribution();
     setInitialCohorts();
@@ -58,7 +67,7 @@ void solver::setInitialDistribution(){ //we assume that, initially, the distribu
     }
     engPutVariable(ep,"x",x_mx);
 
-    engEvalString(ep,"[E0,u0] = init(x)");
+    engEvalString(ep,"[lengthAtBirth,maximumLength,E0,u0] = init(x)");
     double *u0Array = mxGetPr(engGetVariable(ep,"u0"));
     for (unsigned int i =0; i< J;i++){
        U.push_back(u0Array[i]);
@@ -150,7 +159,7 @@ void solver::solve_EBT(){
     double *birthArray,*mortalityArray,*growthArray;
 
     engPutVariable(ep,"x",x_mx);
-    engEvalString(ep,"[E0,u0] = init(x);");
+    engEvalString(ep,"[lengthAtBirth,maximumLength,E0,u0] = init(x);");
     mxArray *E_mx = engGetVariable(ep,"E0");//not getScalar because environment can be multidimensional
 
     double *pE = mxGetPr(E_mx);
@@ -191,19 +200,19 @@ void solver::solve_EBT(){
 
         //Matlab life-processes functions call, one time for the whole vector to limit the number of calls
         //growth rate
-        engPutVariable(ep,"x",x_mx);
+        engPutVariable(ep,"x",x_mx);engPutVariable(ep,"u",u_mx);
 //        std::cout << "x : " << mxGetM(engGetVariable(ep,"x")) << std::endl;
-        engEvalString(ep,"growthRate(x,E);");
+        engEvalString(ep,"growthRate(x,u,E);");
 //        std::cout << "M : " << mxGetM(engGetVariable(ep,"ans")) << std::endl;
 //        std::cout << sizeArrays << std::endl;
         growthArray = mxGetPr(engGetVariable(ep,"ans"));
 
         //birth rate
-        engEvalString(ep,"birthRate(x,E);");
+        engEvalString(ep,"birthRate(x,u,E);");
         birthArray = mxGetPr(engGetVariable(ep,"ans"));
 
         //mortality rate
-       engEvalString(ep,"mortalityRate(x,E);");
+       engEvalString(ep,"mortalityRate(x,u,E);");
         mortalityArray = mxGetPr(engGetVariable(ep,"ans"));
 
 
@@ -384,7 +393,7 @@ void solver::solve_MU(unsigned int move){
     engPutVariable(ep,"J",j_mx); 
 
     engPutVariable(ep,"x",x_mx);
-    engEvalString(ep,"[E0,u0] = init(x);");
+    engEvalString(ep,"[lengthAtBirth,maximumLength,E0,u0] = init(x);");
     mxArray *E_mx = engGetVariable(ep,"E0");//not getScalar because environment can be multidimensional
 
     double *pE = mxGetPr(E_mx);
@@ -418,17 +427,17 @@ void solver::solve_MU(unsigned int move){
        
         //Matlab life-processes functions call, one time for the whole vector to limit the number of calls
         //growth rate
-        engPutVariable(ep,"x",x_mx);
-        engEvalString(ep,"growthRate(x,E);");
+        engPutVariable(ep,"x",x_mx); engPutVariable(ep,"u",u_mx);
+        engEvalString(ep,"growthRate(x,u,E);");
         growthArray = mxGetPr(engGetVariable(ep,"ans"));
 
         //birth rate
         engPutVariable(ep,"x",X_mx);
-        engEvalString(ep,"birthRate(x,E);");
+        engEvalString(ep,"birthRate(x,u,E);");
         birthArray = mxGetPr(engGetVariable(ep,"ans"));
 
         //mortality rate
-       engEvalString(ep,"mortalityRate(x,E);");
+       engEvalString(ep,"mortalityRate(x,u,E);");
         mortalityArray = mxGetPr(engGetVariable(ep,"ans"));
 
         
