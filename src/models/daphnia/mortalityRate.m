@@ -1,3 +1,4 @@
 function[b] = mortalityRate(x,u,S)
-    b = x*0 + 0.1; %%size*0 here just to have a vector output instead of a single value
+    global mu0;
+    b = x*0 + mu0; %%size*0 here just to have a vector output instead of a single value
 end
