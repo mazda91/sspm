@@ -392,15 +392,8 @@ void solver::solve_MU(unsigned int move){
     engPutVariable(ep,"M",m_mx);
     engPutVariable(ep,"J",j_mx); 
 
-    engPutVariable(ep,"x",x_mx);
-    engEvalString(ep,"[lengthAtBirth,maximumLength,E0,u0] = init(x);");
-    mxArray *E_mx = engGetVariable(ep,"E0");//not getScalar because environment can be multidimensional
-
-    double *pE = mxGetPr(E_mx);
-    engPutVariable(ep,"E",E_mx);
-
-
     //init the vector of midpoints mesh before loop (because won't change for FMU so no need to update in the loop)
+    //WARNING : needs to be done BEFORE calling matlab function init(x) : for fish model : wvec (in init.m) takes the value of x, so x needs to be updated before
     for (unsigned int i = 0;i<J;i++){
         pX[i] = X(x,i);
         px[i] = x[i];
@@ -408,6 +401,14 @@ void solver::solve_MU(unsigned int move){
         //std::cout << "(" << pX[i] << "," << (x[i+1] + x[i])/2 << ")" << "/";
     }
     px[J] = x[J];
+
+    engPutVariable(ep,"x",x_mx);
+    engEvalString(ep,"[lengthAtBirth,maximumLength,E0,u0] = init(x);");
+
+    mxArray *E_mx = engGetVariable(ep,"E0");
+    double *pE = mxGetPr(E_mx);
+    engPutVariable(ep,"E",E_mx);
+
 
     for(unsigned int j =0; j<=M; j++){//time
         //std::cout << "-------------------- " << j << " --------------" << std::endl;
@@ -500,16 +501,17 @@ void solver::solve_MU(unsigned int move){
         }
 
         //environment
-        //must compute the new resourceDynamics S
+        //must compute the new resourceDynamics E
         engEvalString(ep,"environment(x,u,E,Tf,M);");
-       *pE = mxGetScalar(engGetVariable(ep,"ans"));
+       pE = mxGetPr(engGetVariable(ep,"ans"));
         engPutVariable(ep,"E",E_mx);
 
         u[J] = u[J-1];//assumption made before finding a solution to the boundary pbm
         usave = u;
         xsave = x;
   }
-    mxDestroyArray(E_mx);mxDestroyArray(size_mx);
+    mxDestroyArray(E_mx);
+    mxDestroyArray(size_mx);
     mxDestroyArray(u_mx);mxDestroyArray(dx_mx);mxDestroyArray(x_mx);
     mxDestroyArray(t_mx);mxDestroyArray(j_mx);mxDestroyArray(m_mx);
     mxDestroyArray(ft_mx);
