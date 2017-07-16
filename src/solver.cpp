@@ -410,6 +410,7 @@ void solver::solve_MU(unsigned int move){
     engPutVariable(ep,"E",E_mx);
 
 
+    std::vector<double> tmp;
     for(unsigned int j =0; j<=M; j++){//time
         //std::cout << "-------------------- " << j << " --------------" << std::endl;
         //-------------------- setting all the data necessary to matlab calculus ---------------------------------
@@ -425,10 +426,12 @@ void solver::solve_MU(unsigned int move){
         }
         px[J] = x[J];
         pu[J] = u[J];
+
        
         //Matlab life-processes functions call, one time for the whole vector to limit the number of calls
         //growth rate
         engPutVariable(ep,"x",x_mx); engPutVariable(ep,"u",u_mx);
+        //std::cout << mxGetPr(engGetVariable(ep,"E"))[0] << std::endl;
         engEvalString(ep,"growthRate(x,u,E);");
         growthArray = mxGetPr(engGetVariable(ep,"ans"));
 
@@ -502,8 +505,10 @@ void solver::solve_MU(unsigned int move){
 
         //environment
         //must compute the new resourceDynamics E
+        engPutVariable(ep,"x",x_mx);
         engEvalString(ep,"environment(x,u,E,Tf,M);");
        pE = mxGetPr(engGetVariable(ep,"ans"));
+        mxSetPr(E_mx,pE);
         engPutVariable(ep,"E",E_mx);
 
         u[J] = u[J-1];//assumption made before finding a solution to the boundary pbm
