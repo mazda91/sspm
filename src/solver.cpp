@@ -339,7 +339,7 @@ void solver::display(mxArray *mesh,mxArray *distribution, mxArray *time){
    engPutVariable(ep,"ti",time);
    engPutVariable(ep,"x",mesh);
    engPutVariable(ep,"u",distribution);
-   engEvalString(ep,"plot(x,u);");
+   engEvalString(ep,"loglog(x,u);");
    engEvalString(ep,"title(sprintf('t = %0.3f',ti));");
    engEvalString(ep,"pause(Tf/M);");
 
@@ -407,6 +407,8 @@ void solver::solve_MU(unsigned int move){
 
     mxArray *E_mx = engGetVariable(ep,"E0");
     double *pE = mxGetPr(E_mx);
+    mxSetPr(E_mx,pE);
+
     engPutVariable(ep,"E",E_mx);
 
 
@@ -432,17 +434,17 @@ void solver::solve_MU(unsigned int move){
         //growth rate
         engPutVariable(ep,"x",x_mx); engPutVariable(ep,"u",u_mx);
         //std::cout << mxGetPr(engGetVariable(ep,"E"))[0] << std::endl;
-        engEvalString(ep,"growthRate(x,u,E);");
-        growthArray = mxGetPr(engGetVariable(ep,"ans"));
+        engEvalString(ep,"sol = growthRate(x,u,E);");
+        growthArray = mxGetPr(engGetVariable(ep,"sol"));
 
         //birth rate
         engPutVariable(ep,"x",X_mx);
-        engEvalString(ep,"birthRate(x,u,E);");
-        birthArray = mxGetPr(engGetVariable(ep,"ans"));
+        engEvalString(ep,"sol = birthRate(x,u,E);");
+        birthArray = mxGetPr(engGetVariable(ep,"sol"));
 
         //mortality rate
-       engEvalString(ep,"mortalityRate(x,u,E);");
-        mortalityArray = mxGetPr(engGetVariable(ep,"ans"));
+       engEvalString(ep,"sol = mortalityRate(x,u,E);");
+        mortalityArray = mxGetPr(engGetVariable(ep,"sol"));
 
         
         display(x_mx,u_mx,t_mx);
@@ -506,8 +508,8 @@ void solver::solve_MU(unsigned int move){
         //environment
         //must compute the new resourceDynamics E
         engPutVariable(ep,"x",x_mx);
-        engEvalString(ep,"environment(x,u,E,Tf,M);");
-       pE = mxGetPr(engGetVariable(ep,"ans"));
+        engEvalString(ep,"sol = environment(x,u,E,Tf,M);");
+       pE = mxGetPr(engGetVariable(ep,"sol"));
         mxSetPr(E_mx,pE);
         engPutVariable(ep,"E",E_mx);
 

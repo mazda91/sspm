@@ -21,14 +21,13 @@ function[lengthAtBirth,maximumLength,E0,u0]= init(m)
 
     dimensions = size(m);
     nbCols = dimensions(1);
-    lengthAtBirth = s;
+    lengthAtBirth = 0.08;
     maximumLength = 4;
     %%I can't use gaussian function, but you can replace this with gaussmf if you
     %%have required toolbox installed
-    mean = (maximumLength - lengthAtBirth)/2;
+    mean1 = (maximumLength - lengthAtBirth)/2;
     sigma = 0.1;
-    %u0 = 0.25*(1/(sigma*sqrt(2*pi)))*exp(-((m-mean).^2)/(20*sigma^2));
-    u0 = rand(nbCols,1);
+    u0 = 0.25*(1/(sigma*sqrt(2*pi)))*exp(-((m-mean1).^2)/(200*sigma^2));
+    %u0 = rand(1,nbCols);
     E0 = environment(m,u0,0,0,0);
-
 end
