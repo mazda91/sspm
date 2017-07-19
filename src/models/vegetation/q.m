@@ -1,9 +1,13 @@
-function[res] = q(z,h)
+function[res] = q(z,height)
     global eta;
 
-    if (z <=h)
-        res = 2*eta*(1-(z.^eta)*h^(-eta))*z^(eta-1)*h^(-eta);
-    else
-        res = 0;    
-    end
+    %if (z <=height)
+     %   res = 2*eta*(1-(z.^eta)' *(height.^(-eta))').*((z.^(eta-1))'*(height.^(-eta))');
+    %else
+     %   res = 0;    
+    %end
+    res = 2*eta*(1-(z.^eta)' *(height.^(-eta))').*((z.^(eta-1))'*(height.^(-eta))');
+    %res = 2*eta*(1-(z.^eta)' *(height.^(-eta))).*((z.^(eta-1))'*(height.^(-eta)));
+    res((z>height),:) = 0;
+    %res(:,(z>height)) = 0;
 end
