@@ -1,8 +1,11 @@
 function[res] = birthRate(m,u,E)
     global pi0; global cass; global s; global nbCols;
+    global Pme;
 
     dimensions = size(m);
     nbCols = dimensions(1);
-    res = max((pi0/(cass*s))*pi1(m,E).*r(m).*P(m,E),0);
+
+    Pme = P(m,E);
+    res = max((pi0/(cass*s))*pi1(m,E).*r(m).*Pme,0);
 
 end

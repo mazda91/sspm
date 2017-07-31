@@ -435,6 +435,7 @@ void solver::solve_MU(unsigned int move){
         engPutVariable(ep,"x",x_mx); engPutVariable(ep,"u",u_mx);
         //std::cout << mxGetPr(engGetVariable(ep,"E"))[0] << std::endl;
         engEvalString(ep,"sol = growthRate(x,u,E);");
+        mxArray *tmpmx = engGetVariable(ep,"sol");
         growthArray = mxGetPr(engGetVariable(ep,"sol"));
 
         //birth rate
@@ -484,9 +485,12 @@ void solver::solve_MU(unsigned int move){
                //u[0] = (1/usedModel->g(usedModel->lengthAtBirth,S))*sumBirth;
                 u[0] = (1/growthArray[0])*sumBirth;
                 U[0] = u[0];
-                u[1] = u[0];//assumption made before finding a solution to the boundary pbm
-                U[1] = u[1];
-            }else if (i==1){;}
+//                u[1] = u[0];//assumption made before finding a solution to the boundary pbm
+//                U[1] = u[1];
+            }else if (i==1){
+                u[1] = (u[0] + u[2])/2;
+                U[1] = (U[0] + U[2])/2;
+            }
             else{ 
                 rMinus = (U[i]-U[i-1])*(xsave[i]-xsave[i-2])/((U[i-1]-U[i-2])*(xsave[i-1]-xsave[i-2]));
                 rPlus = (U[i-1]-U[i])*(xsave[i]-xsave[i+2])/((U[i]-U[i+1])*(xsave[i-1]-xsave[i]));

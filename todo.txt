@@ -3,6 +3,8 @@ site with a possible solution to pass a function_handle as an input (to test if 
 
 set matlab path automatically
 
+notice mistake in N13
+
 tracking C++ and Matlab memory leaks
 
 
@@ -36,3 +38,6 @@ specify parameters
 making that if lengthAtBirth > maximumLength : return errors
 replacing the addParameters etc in model by a container
 
+tell supervisors to change some things in the document : 
+N2 + check emails for other useful informations
+N16 : forget the power -1
