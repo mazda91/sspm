@@ -1,5 +1,5 @@
 function[res] = growthRate(m,u,E)
-    global nbCols;
+    global nbCols; 
 
     dimensions = size(m);
     nbCols = dimensions(1);

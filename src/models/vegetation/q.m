@@ -8,6 +8,6 @@ function[res] = q(z,height)
     %end
     res = 2*eta*(1-(z.^eta)' *(height.^(-eta))').*((z.^(eta-1))'*(height.^(-eta))');
     %res = 2*eta*(1-(z.^eta)' *(height.^(-eta))).*((z.^(eta-1))'*(height.^(-eta)));
-    res((z>height),:) = 0;
+    %res((z>height),:) = 0;
     %res(:,(z>height)) = 0;
 end

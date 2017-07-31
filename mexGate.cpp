@@ -16,24 +16,24 @@ void mexGate(){
     model *usedModel = new model();
     solveModel->setModel(usedModel);
 
-    ifstream myfile("src/command1.m",ios::in);         
-    char c;                                                                     
-    char content[MAXCHAR];                                                      
-    unsigned int i = 0;                                                         
-    if (myfile){                                                                
-        while (myfile.get(c)){                                                  
-           content[i] = c;                                                     
-           i += 1;                                                             
-        }                                                                       
-      myfile.close();                                                         
-    }    
-    //std::cout << content << std::endl;
+  //  ifstream myfile("src/command1.m",ios::in);         
+  //  char c;                                                                     
+  //  char content[MAXCHAR];                                                      
+  //  unsigned int i = 0;                                                         
+  //  if (myfile){                                                                
+  //      while (myfile.get(c)){                                                  
+  //         content[i] = c;                                                     
+  //         i += 1;                                                             
+  //      }                                                                       
+  //    myfile.close();                                                         
+  //  }    
+  //  //std::cout << content << std::endl;
     while (true){
-         engEvalString(ep,content);
+         engEvalString(ep,"command1;");
          mxArray *mxCommand = engGetVariable(ep,"command_line");
          char* command_line =  mxArrayToString(mxCommand);
          string str(command_line);
-        // cout << command_line << std::endl;
+         cout << command_line << std::endl;
          evaluate_command(command_line, &usedModel, &solveModel);
          solveModel->reInitialize();
         //solveModel->displayEquilibrum();
