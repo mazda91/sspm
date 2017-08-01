@@ -45,7 +45,6 @@ void solver::setSizeMesh(){
     double *px = mxGetPr(x_mx);
 
     engPutVariable(ep,"x",x_mx);
-
     engEvalString(ep,"[lengthAtBirth,maximumLength,E0,u0] = init(x)");
     this->usedModel->lengthAtBirth= mxGetScalar(engGetVariable(ep,"lengthAtBirth"));
     this->usedModel->maximumLength= mxGetScalar(engGetVariable(ep,"maximumLength"));
@@ -66,7 +65,6 @@ void solver::setInitialDistribution(){ //we assume that, initially, the distribu
         px[i] = x[i];
     }
     engPutVariable(ep,"x",x_mx);
-
     engEvalString(ep,"[lengthAtBirth,maximumLength,E0,u0] = init(x)");
     double *u0Array = mxGetPr(engGetVariable(ep,"u0"));
     for (unsigned int i =0; i< J;i++){
@@ -435,7 +433,6 @@ void solver::solve_MU(unsigned int move){
         engPutVariable(ep,"x",x_mx); engPutVariable(ep,"u",u_mx);
         //std::cout << mxGetPr(engGetVariable(ep,"E"))[0] << std::endl;
         engEvalString(ep,"sol = growthRate(x,u,E);");
-        mxArray *tmpmx = engGetVariable(ep,"sol");
         growthArray = mxGetPr(engGetVariable(ep,"sol"));
 
         //birth rate
@@ -447,7 +444,7 @@ void solver::solve_MU(unsigned int move){
        engEvalString(ep,"sol = mortalityRate(x,u,E);");
         mortalityArray = mxGetPr(engGetVariable(ep,"sol"));
 
-        
+       
         display(x_mx,u_mx,t_mx);
 
         if(move==1){//FIRST WE compute the variations of xi's if MMU
@@ -514,6 +511,7 @@ void solver::solve_MU(unsigned int move){
         engPutVariable(ep,"x",x_mx);
         engEvalString(ep,"sol = environment(x,u,E,Tf,M);");
        pE = mxGetPr(engGetVariable(ep,"sol"));
+
         mxSetPr(E_mx,pE);
         engPutVariable(ep,"E",E_mx);
 
