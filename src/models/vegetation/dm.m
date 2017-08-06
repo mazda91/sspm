@@ -4,7 +4,7 @@ function[res] = dm(m)
 
     hm = h(m);
     omegam = omega(m);    
-    dms = (rho*etac/theta)*(hm/phi + alpha1*(beta1/phi)*omegam.*((omegam/phi).^(beta1-1)));
+    dms = (1+beta1)*(rho*etac/theta)*alpha1*(phi^(-1-beta1))*(m.^beta1);
     dmb = b*dms;
     dmh = rho*etac*alpha2*(beta2/phi)*omegam.^(beta2-1);
     dmr = alpha3/phi + 0*m;

@@ -3,5 +3,5 @@ function[res] = mortalityRate(m,u,E)
 
     dimensions = size(m);
     nbCols = dimensions(1);
-    res = cd0*exp(-cd1*rho) + cd2*exp(-cd3*P(m,E)./omega(m));
+    res = cd0*exp(-cd1*rho) + cd2*exp(-cd3*P(m,u,E)./omega(m));
 end

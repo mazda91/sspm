@@ -5,7 +5,7 @@ function[res] = birthRate(m,u,E)
     dimensions = size(m);
     nbCols = dimensions(1);
 
-    Pme = P(m,E);
-    res = max((pi0/(cass*s))*pi1(m,E).*r2(m).*Pme,0);
-
+    Pme = P(m,u,E);
+    res = max((pi0/(cass*s))*pi1(m,u,E).*r2(m).*Pme,0);
+    res = pi1(m,E);
 end

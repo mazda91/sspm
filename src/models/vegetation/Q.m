@@ -1,11 +1,10 @@
 function[res] = Q(z,height)
     global nbCols; global eta;
 
-    qmat = zeros(nbCols,1);
-    res = zeros(nbCols,1);
-    q = @(x,height) 2*eta*(1-(x.^eta)' *(height.^(-eta))').*((x.^(eta-1))'*(height.^(-eta))');
+    %qmat = zeros(nbCols,1);
+    %res = zeros(nbCols,1);
     for j=1:nbCols
-         zvec = linspace(z(j),height,nbCols);
+         %zvec = linspace(z(j),height,nbCols);
          
          if (z(j) <= height)
              %for i=1:nbCols
@@ -19,7 +18,7 @@ function[res] = Q(z,height)
               %   res(j,1) = res(j,1) + (tmp1 + tmp2)*(zvec(i+1) - zvec(i))/2; 
 	     %end
              
-             res(j,1) = integral(@(x)q(x,height),z(j),height,'ArrayValued',true);
+             res(j,1) = integral(@(x)q2(x,height),z(j),height,'ArrayValued',true);
          else
              res(j,1) = 0;
          end

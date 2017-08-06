@@ -1,5 +1,5 @@
-function[res] = P(m,E)
+function[res] = P(m,u,E)
     global cbio; global Y;
-    Ame = A(m,E);
+    Ame = A(m,u,E);
     res = cbio*Y*(Ame - R(m)) - T(m); 
 end

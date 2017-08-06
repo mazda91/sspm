@@ -481,14 +481,23 @@ void solver::solve_MU(unsigned int move){
                }
                //u[0] = (1/usedModel->g(usedModel->lengthAtBirth,S))*sumBirth;
                 u[0] = (1/growthArray[0])*sumBirth;
-                U[0] = u[0];
+//                U[0] = u[0];
 //                u[1] = u[0];//assumption made before finding a solution to the boundary pbm
 //                U[1] = u[1];
             }else if (i==1){
-                u[1] = (u[0] + u[2])/2;
-                U[1] = (U[0] + U[2])/2;
+                u[1] = (u[0] + u[2])/2; u[1] = U[0] + (x[1] - x[0])*(-mortalityArray[i]*U[i] - (1/(xsave[i+1]-xsave[i]))*(growthArray[i+1]*usave[i+1] -  growthArray[i]*usave[i] ))*step;
+
+//                U[1] = u[1];
+                U[0] = (u[0] + u[1])/2;
+                U[1] = (u[1] + u[2])/2;
+
             }
             else{ 
+                 dUi += -mortalityArray[i]*U[i] - (1/(xsave[i+1]-xsave[i]))*(growthArray[i+1]*usave[i+1] -  growthArray[i]*usave[i] );
+                if(move == 1){
+                    dUi += (1/(xsave[i+1]-xsave[i]))*(pdx[i+1]*usave[i+1] - pdx[i]*usave[i] - (pdx[i+1] - pdx[i])*U[i]); 
+                }
+                U[i] = U[i] + step*dUi;//for all i, we have the average distribution on each interval
                 rMinus = (U[i]-U[i-1])*(xsave[i]-xsave[i-2])/((U[i-1]-U[i-2])*(xsave[i-1]-xsave[i-2]));
                 rPlus = (U[i-1]-U[i])*(xsave[i]-xsave[i+2])/((U[i]-U[i+1])*(xsave[i-1]-xsave[i]));
                 //if(usedModel->g(xsave[i],S) - dx[i] >=0){
@@ -498,11 +507,7 @@ void solver::solve_MU(unsigned int move){
                 else{
                     u[i] = U[i] - phi(rPlus)*(U[i+1]-U[i])*(xsave[i+1]-xsave[i])/(xsave[i+2]-xsave[i]); 
                 }
-                dUi += -mortalityArray[i]*U[i] - (1/(xsave[i+1]-xsave[i]))*(growthArray[i+1]*usave[i+1] -  growthArray[i]*usave[i] );
-                if(move == 1){
-                    dUi += (1/(xsave[i+1]-xsave[i]))*(pdx[i+1]*usave[i+1] - pdx[i]*usave[i] - (pdx[i+1] - pdx[i])*U[i]); 
-                }
-                U[i] = U[i] + step*dUi;//for all i, we have the average distribution on each interval
+
             }
         }
 
