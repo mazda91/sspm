@@ -1,8 +1,6 @@
 #include "../include/mmi.hpp"
 #include <string>
 
-// Transforms a string s into a vector of words (substrings not containing 
-// spaces)
 void tokenize(const std::string &s, std::vector<std::string> &tokens) {
     std::istringstream f(s);
     std::string word;    
@@ -19,7 +17,7 @@ double convert(std::string par){
     return atof(str_value);
 }
 
-void evaluate_command(std::string line, model **usedModel, solver **solveModel){
+void evaluate_command(std::string line, model **usedModel, solver **solveModel,bool &quit){
     std::vector<std::string> command;
     std::string model,parameter;
     std::string method = "";
@@ -52,14 +50,16 @@ void evaluate_command(std::string line, model **usedModel, solver **solveModel){
             std::cout << "here you can do ..." << std::endl;
             i += 1;
         } else if ((command[i] ==  "-q") ||(command[i] == "-quit")){
-            exit(0);
+            quit = true;
+            found = false;
         }else if(command[i] == "-solve"){
             if ((*usedModel) == NULL){
                 std::cout << "No model defined. Can't solve." << std::endl;
-                std::cout << "All the information provided after '" << command[i] << "'have not been taken into account." << std::endl;
+                std::cout << "All the information provided after '" << command[i] << " 'have not been taken into account." << std::endl;
                 found = false;
             }
             else{
+                (*solveModel)->reInitialize();
                 (*solveModel)->solve();
                 i += 1;
             }

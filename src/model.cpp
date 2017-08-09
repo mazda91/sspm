@@ -38,7 +38,7 @@ void model::showAttributeList() const{
     std::cout << "maximum length : " << this->maximumLength << std::endl;
 }
 
-//in the vector of parameters
+
 void model::setParameter(std::string parameterName, double value){
     getParameter(parameterName).value = value;
 }
@@ -88,12 +88,4 @@ void model::showParameter(std::string parameterName){
 
 } 
 
-double model::dS(double S, std::vector<double> &x, std::vector<double> &u) {
-    double integral = 0;
-   for (unsigned int i=0;i<(x.size()-1);i++){
-        integral += (x[i+1] - x[i])*(pow(x[i+1],2)*u[i+1]+ pow(x[i],2)*u[i])/2.0;
-   } 
-   return 0.5*S*(1-S/3)-(S/(1+S))*integral;
-
-}
 

@@ -1,15 +1,16 @@
 #include "../include/solver.hpp"
 
-/*
- *@todo : resize the vectors x,u and U if J changes
- *
- */
+
+
 solver::solver(Engine *ep){
     this->ep = ep;
     this->x = std::vector<double>();
 }
 
-solver::~solver(){}
+solver::~solver(){ 
+    delete this->usedModel;
+    engClose(ep);
+}
 
 void solver::setEngine(Engine *ep){
     this->ep = ep;
@@ -22,16 +23,12 @@ void solver::setModel(model *model){
 
 void solver::setMethod(std::string method){this->usedMethod = method;}
 
-/*
- *resize u,U and x
- */
 void solver::setJ(unsigned int nbSizeIntervals){
+    //If J changes, all vectors need to be resized
     u.clear();
     U.clear();
     this->J = nbSizeIntervals;
     setSizeMesh();
-    setInitialDistribution();
-    setInitialCohorts();
 }
 
 void solver::setM(unsigned int nbTimeIntervals){this->M = nbTimeIntervals;}
@@ -42,10 +39,9 @@ void solver::setTau(double tau){this->tau = tau;}
 void solver::setSizeMesh(){
     x.clear(); //x of size 0
     mxArray *x_mx = mxCreateDoubleMatrix(J+1,1,mxREAL); //mesh array
-    double *px = mxGetPr(x_mx);
 
     engPutVariable(ep,"x",x_mx);
-    engEvalString(ep,"[lengthAtBirth,maximumLength,E0,u0] = init(x)");
+    engEvalString(ep,"[lengthAtBirth,maximumLength,E0,u0,N0] = init(x)");
     this->usedModel->lengthAtBirth= mxGetScalar(engGetVariable(ep,"lengthAtBirth"));
     this->usedModel->maximumLength= mxGetScalar(engGetVariable(ep,"maximumLength"));
 
@@ -53,52 +49,40 @@ void solver::setSizeMesh(){
    for (unsigned int i=0; i<= this->J ;i++){
        x.push_back(this->usedModel->lengthAtBirth + i*stepSize); 
    }
-    setInitialDistribution();
-    setInitialCohorts();
+    setInitialSolutions();
+    mxDestroyArray(x_mx);
 }
 
-void solver::setInitialDistribution(){ //we assume that, initially, the distribution is equal between classes
+void solver::setInitialSolutions(){ 
     u.clear(); U.clear();
+    E.clear(); N.clear();
+
     mxArray *x_mx = mxCreateDoubleMatrix(J+1,1,mxREAL); //mesh array
     double *px = mxGetPr(x_mx);
     for (unsigned int i = 0;i<=J;i++){
         px[i] = x[i];
     }
     engPutVariable(ep,"x",x_mx);
-    engEvalString(ep,"[lengthAtBirth,maximumLength,E0,u0] = init(x)");
+    engEvalString(ep,"[lengthAtBirth,maximumLength,E0,u0,N0] = init(x)");
     double *u0Array = mxGetPr(engGetVariable(ep,"u0"));
+    double *N0Array = mxGetPr(engGetVariable(ep,"N0"));
     for (unsigned int i =0; i< J;i++){
        U.push_back(u0Array[i]);
        u.push_back(u0Array[i]);
+       N.push_back(N0Array[i]);
     }
+    N.push_back(N0Array[J]);
     u.push_back(u0Array[J]);
-//    srand(time(NULL));
-//    u.clear(); U.clear();
-//    double tmp1;
-//    for (unsigned int i=0; i<J;i++){
-//        tmp1 = (double (rand()%J))/J;
-//        U.push_back(tmp1);
-//        u.push_back(tmp1);
-//    }
-//    u.push_back((double (rand()%J))/J);
-
+    E.resize(mxGetM(engGetVariable(ep,"E0")));
+    mxDestroyArray(x_mx);
 }
 
-void solver::setInitialCohorts(){
-    N.clear();
-    srand(time(NULL));
-    for (unsigned int i = 0; i<J+1; i++){
-        N.push_back(rand()%J);
-    }
-}
 
 void solver::reInitialize(){
     if (this->usedModel != NULL){
         setSizeMesh();
     }
-    setInitialDistribution();
-    setInitialCohorts();
-
+    setInitialSolutions();
 }
 
 void solver::initParameters(){
@@ -120,13 +104,6 @@ void solver::solve(){
     }
 }
 
-double solver::totalAbundance(){
-    double res = 0;
-    for (unsigned int i=0;i<N.size();i++){
-        res += N[i];
-    }
-    return res;
-}
 void solver::solve_EBT(){
    double step = Tf/M; 
    double dN0,dPi0,Pi0,dNi,dxi = 0;
@@ -144,23 +121,19 @@ void solver::solve_EBT(){
     mxArray *m_mx = mxCreateDoubleScalar(M);
     mxArray *t_mx = mxCreateDoubleScalar(0);
     mxArray *ft_mx = mxCreateDoubleScalar(Tf);
-    //mxArray *S_mx = mxCreateDoubleScalar(S);
    double *pu = mxGetPr(u_mx);
    double *pxsave = mxGetPr(xsave_mx);
    double *px = mxGetPr(x_mx);
-    double *pm = mxGetPr(m_mx);
     double *pt = mxGetPr(t_mx);
-    double *pft = mxGetPr(ft_mx);
-   double *pxnew;
 
 
     double *birthArray,*mortalityArray,*growthArray;
 
     engPutVariable(ep,"x",x_mx);
-    engEvalString(ep,"[lengthAtBirth,maximumLength,E0,u0] = init(x);");
-    mxArray *E_mx = engGetVariable(ep,"E0");//not getScalar because environment can be multidimensional
-
+    engEvalString(ep,"[lengthAtBirth,maximumLength,E0,u0,N0] = init(x);");
+    mxArray *E_mx = engGetVariable(ep,"E0");
     double *pE = mxGetPr(E_mx);
+    double *mem = (double *)mxCalloc(mxGetM(E_mx),sizeof(double));
     engPutVariable(ep,"E",E_mx);
 
    engPutVariable(ep,"Tf",ft_mx);
@@ -169,12 +142,10 @@ void solver::solve_EBT(){
     //build the fixmesh (to compare EBT with other methods in the end --> display);
     for (unsigned int i = 0; i < J; i++){
         elt.xmin = x[i] - (x[i+1]-x[i])/2;elt.xmax = x[i] + (x[i+1]-x[i])/2; elt.xnode = x[i];
-        //std::cout << "(" << elt.xmin << "," << elt.xmax << ")" << "/";
         elt.abundance = 0;
         fixedMesh.push_back(elt);
     }
         elt.xmin = x[J] - (x[J]-x[J-1])/2;elt.xmax = x[J] + (x[J]-x[J-1])/2; elt.xnode = x[J];
-        //std::cout << "(" << elt.xmin << "," << elt.xmax << ")" << "/";
         elt.abundance = 0;
         fixedMesh.push_back(elt);
 
@@ -194,15 +165,13 @@ void solver::solve_EBT(){
         for(unsigned int i=0;i<J+1;i++){
             pu[i] = u[i];
         }
+        engPutVariable(ep,"u",u_mx);
         display(xsave_mx,u_mx,t_mx);
 
         //Matlab life-processes functions call, one time for the whole vector to limit the number of calls
         //growth rate
-        engPutVariable(ep,"x",x_mx);engPutVariable(ep,"u",u_mx);
-//        std::cout << "x : " << mxGetM(engGetVariable(ep,"x")) << std::endl;
+        engPutVariable(ep,"x",x_mx);
         engEvalString(ep,"growthRate(x,u,E);");
-//        std::cout << "M : " << mxGetM(engGetVariable(ep,"ans")) << std::endl;
-//        std::cout << sizeArrays << std::endl;
         growthArray = mxGetPr(engGetVariable(ep,"ans"));
 
         //birth rate
@@ -214,15 +183,9 @@ void solver::solve_EBT(){
         mortalityArray = mxGetPr(engGetVariable(ep,"ans"));
 
 
-//        growthArray = (double*)mxRealloc(growthArraynew,sizeArrays * sizeof(double));
-//        birthArray = (double*)mxRealloc(birthArraynew,sizeArrays * sizeof(double));
-//        mortalityArray = (double*)mxRealloc(mortalityArraynew,sizeArrays * sizeof(double));
-
         fecundity = 0;
-//        dN0 = -usedModel->mu(usedModel->lb,S)*N[0] - Pi0*(usedModel->mu(x[1],S) - usedModel->mu(x[0],S))/(x[1] - x [0]);
         dN0 = -mortalityArray[0]*N[0] - Pi0*(mortalityArray[1] - mortalityArray[0])/(x[1] - x [0]);
         for (unsigned int k = 0;k<sizeArrays;k++){
-//            fecundity += usedModel->beta(x[k],S)*N[k];
             fecundity += birthArray[k]*N[k];
         }
         dN0 += fecundity;
@@ -240,14 +203,11 @@ void solver::solve_EBT(){
         }
     min = removeCohort();
     if (min != -1){
-//        x.erase(x.begin() + min);
         sizeArrays -= 1;
     }
 
-     //   //reorganize cohorts
-//     std::cout << N.size() << std::endl;
-//     showContent(u);
-     if ((j % 3) == 0){
+     //reorganize cohorts
+     if ((j % 5) == 0){
         if (N[0] != 0){
             x[0] = usedModel->lb + Pi0/N[0];
         }
@@ -255,24 +215,26 @@ void solver::solve_EBT(){
         x.insert(x.begin(),usedModel->lb);
         sizeArrays += 1;
      }
-//    showContent(N);
-//    std::cout << std::endl;
-//    std::cout << "before :" << std::endl;
-//    showContent(u);
-//    std::cout << min << std::endl;
-//     std::cout << N.size() << std::endl;
 
-    compareMethods(fixedMesh,x,u,N);
+    cohortsToDensity(fixedMesh,x,u,N);
 
      //environment
      //must compute the new resourceDynamics S
      engPutVariable(ep,"x",xsave_mx);
-     engEvalString(ep,"environment(x,u,E,Tf,M);");
-     *pE = mxGetScalar(engGetVariable(ep,"ans"));
-     engPutVariable(ep,"E",E_mx);
-
-   
+     engEvalString(ep,"sol = environment(x,u,E,Tf,M);");
+    pE = mxGetPr(engGetVariable(ep,"sol"));
+    for (unsigned int i=0; i<mxGetM(E_mx) ;i++){                               
+        mem[i]= pE[i];                                                         
+    }     
+    mxSetPr(E_mx,mem);
+    engPutVariable(ep,"E",E_mx);
+  
    }
+    //get the final value of E
+    for (unsigned int index =0;index < mxGetM(E_mx); index++){
+        E[index] = pE[index];
+    }
+
     mxDestroyArray(xsave_mx);
   mxDestroyArray(E_mx);
     mxDestroyArray(u_mx);
@@ -282,7 +244,7 @@ void solver::solve_EBT(){
     mxDestroyArray(ft_mx);
 }
 
-void solver::compareMethods(std::vector<cohort> & fixedMesh, std::vector<double> & newX, std::vector<double> & u, std::vector<double> & abundance){
+void solver::cohortsToDensity(std::vector<cohort> & fixedMesh, std::vector<double> & newX, std::vector<double> & u, std::vector<double> & abundance){
     unsigned int cmpt;
     double maxDiff = fixedMesh[1].xnode - fixedMesh[0].xnode;
     for (unsigned int i=0;i<J+1;i++){
@@ -310,12 +272,10 @@ void solver::compareMethods(std::vector<cohort> & fixedMesh, std::vector<double>
     }
     for (unsigned int i = 0;i<J+1;i++){
         u[i] = u[i]*(fixedMesh[i].xmax - fixedMesh[i].xmin);
-//        std::cout << fixedMesh[i].xmax - fixedMesh[i].xmin << "/";
     }
-//    std::cout << std::endl;
-//    std::cout << "after : " << std::endl;
-//    showContent(u);
 }
+
+
 int solver::removeCohort(){
     //look for the minimum
     int min = 0;
@@ -336,11 +296,7 @@ int solver::removeCohort(){
 void solver::display(mxArray *mesh,mxArray *distribution, mxArray *time){
    engPutVariable(ep,"ti",time);
    engPutVariable(ep,"x",mesh);
-   engPutVariable(ep,"u",distribution);
-   engEvalString(ep,"loglog(x,u);");
-   engEvalString(ep,"title(sprintf('t = %0.3f',ti));");
-   engEvalString(ep,"pause(Tf/M);");
-
+   engEvalString(ep,"show(x,u,E,ti,Tf,M);");
 
 }
 
@@ -378,13 +334,10 @@ void solver::solve_MU(unsigned int move){
     mxArray *t_mx = mxCreateDoubleScalar(0);//time
     double *pt = mxGetPr(t_mx);
     mxArray *ft_mx = mxCreateDoubleScalar(Tf);//ending time
-    mxArray *size_mx = mxCreateDoubleScalar(0);//single mesh value
-    double *psize = mxGetPr(size_mx);
 
 
     double *birthArray,*mortalityArray,*growthArray;
 
-    engPutVariable(ep,"size",size_mx);
     //bind variables that won't change during computation
     engPutVariable(ep,"Tf",ft_mx);
     engPutVariable(ep,"M",m_mx);
@@ -395,26 +348,23 @@ void solver::solve_MU(unsigned int move){
     for (unsigned int i = 0;i<J;i++){
         pX[i] = X(x,i);
         px[i] = x[i];
-
-        //std::cout << "(" << pX[i] << "," << (x[i+1] + x[i])/2 << ")" << "/";
     }
     px[J] = x[J];
 
     engPutVariable(ep,"x",x_mx);
-    engEvalString(ep,"[lengthAtBirth,maximumLength,E0,u0] = init(x);");
+    engEvalString(ep,"[lengthAtBirth,maximumLength,E0,u0,N0] = init(x);");
 
     mxArray *E_mx = engGetVariable(ep,"E0");
     double *pE = mxGetPr(E_mx);
-    mxSetPr(E_mx,pE);
+    double *mem = (double *)mxCalloc(mxGetM(E_mx),sizeof(double));
+  //  mxSetPr(E_mx,pE);
 
     engPutVariable(ep,"E",E_mx);
 
 
-    std::vector<double> tmp;
     for(unsigned int j =0; j<=M; j++){//time
-        //std::cout << "-------------------- " << j << " --------------" << std::endl;
-        //-------------------- setting all the data necessary to matlab calculus ---------------------------------
-        // time / space grid / distribution /vector of mid-nodes
+ //       //-------------------- setting all the data necessary to matlab calculus ---------------------------------
+ //       // time / space grid / distribution /vector of mid-nodes
         pt[0] = j*step;
         for (unsigned int i = 0;i<J;i++){
             if (move == 1){//if MMU, update the points meshes 
@@ -422,29 +372,28 @@ void solver::solve_MU(unsigned int move){
                 px[i] = x[i];
             }
             pu[i] = u[i];
-            //std::cout << u[i] << "/";
         }
         px[J] = x[J];
         pu[J] = u[J];
 
-       
-        //Matlab life-processes functions call, one time for the whole vector to limit the number of calls
-        //growth rate
+ //      
+ //       //Matlab life-processes functions call, one time for the whole vector to limit the number of calls
+ //       //growth rate
         engPutVariable(ep,"x",x_mx); engPutVariable(ep,"u",u_mx);
-        //std::cout << mxGetPr(engGetVariable(ep,"E"))[0] << std::endl;
+ //       //std::cout << mxGetPr(engGetVariable(ep,"E"))[0] << std::endl;
         engEvalString(ep,"sol = growthRate(x,u,E);");
         growthArray = mxGetPr(engGetVariable(ep,"sol"));
 
-        //birth rate
+ //       //birth rate
         engPutVariable(ep,"x",X_mx);
         engEvalString(ep,"sol = birthRate(x,u,E);");
         birthArray = mxGetPr(engGetVariable(ep,"sol"));
 
-        //mortality rate
+ //       //mortality rate
        engEvalString(ep,"sol = mortalityRate(x,u,E);");
         mortalityArray = mxGetPr(engGetVariable(ep,"sol"));
 
-       
+ //      
         display(x_mx,u_mx,t_mx);
 
         if(move==1){//FIRST WE compute the variations of xi's if MMU
@@ -475,19 +424,12 @@ void solver::solve_MU(unsigned int move){
             dUi=0;
             if(i==0){ //taking into account equation (1b) : newborn individuals
                 for(unsigned int k=0;k<J; k++){
-                     //sumBirth +=(x[k+1] - x[k]) * usedModel->beta(X(k),S)*U[k];
-                     //std::cout << birthArray[k] << "/" ; 
                     sumBirth +=(xsave[k+1] - xsave[k]) * birthArray[k]*U[k];
                }
-               //u[0] = (1/usedModel->g(usedModel->lengthAtBirth,S))*sumBirth;
                 u[0] = (1/growthArray[0])*sumBirth;
-//                U[0] = u[0];
-//                u[1] = u[0];//assumption made before finding a solution to the boundary pbm
-//                U[1] = u[1];
             }else if (i==1){
-                u[1] = (u[0] + u[2])/2; u[1] = U[0] + (x[1] - x[0])*(-mortalityArray[i]*U[i] - (1/(xsave[i+1]-xsave[i]))*(growthArray[i+1]*usave[i+1] -  growthArray[i]*usave[i] ))*step;
+                u[1] = U[0] + (x[1] - x[0])*(-mortalityArray[i]*U[i] - (1/(xsave[i+1]-xsave[i]))*(growthArray[i+1]*usave[i+1] -  growthArray[i]*usave[i] ))*step;
 
-//                U[1] = u[1];
                 U[0] = (u[0] + u[1])/2;
                 U[1] = (u[1] + u[2])/2;
 
@@ -500,7 +442,7 @@ void solver::solve_MU(unsigned int move){
                 U[i] = U[i] + step*dUi;//for all i, we have the average distribution on each interval
                 rMinus = (U[i]-U[i-1])*(xsave[i]-xsave[i-2])/((U[i-1]-U[i-2])*(xsave[i-1]-xsave[i-2]));
                 rPlus = (U[i-1]-U[i])*(xsave[i]-xsave[i+2])/((U[i]-U[i+1])*(xsave[i-1]-xsave[i]));
-                //if(usedModel->g(xsave[i],S) - dx[i] >=0){
+
                 if(growthArray[i] - dx[i] >=0){
                      u[i] = U[i-1] + phi(rMinus)*(U[i-1]-U[i-2])*(xsave[i]-xsave[i-1])/(xsave[i+1]-xsave[i-1]); 
                 }   
@@ -515,18 +457,25 @@ void solver::solve_MU(unsigned int move){
         //must compute the new resourceDynamics E
         engPutVariable(ep,"x",x_mx);
         engEvalString(ep,"sol = environment(x,u,E,Tf,M);");
-       pE = mxGetPr(engGetVariable(ep,"sol"));
-
-        mxSetPr(E_mx,pE);
+        pE = mxGetPr(engGetVariable(ep,"sol"));
+        for (unsigned int i=0; i<mxGetM(E_mx) ;i++){                               
+            mem[i]= pE[i];                                                         
+        }     
+        mxSetPr(E_mx,mem);
         engPutVariable(ep,"E",E_mx);
 
         u[J] = u[J-1];//assumption made before finding a solution to the boundary pbm
         usave = u;
         xsave = x;
+
   }
+    //get the final value of E
+    for (unsigned int index =0;index < mxGetM(E_mx); index++){
+        E[index] = pE[index];
+    }
     mxDestroyArray(E_mx);
-    mxDestroyArray(size_mx);
     mxDestroyArray(u_mx);mxDestroyArray(dx_mx);mxDestroyArray(x_mx);
+    mxDestroyArray(X_mx);
     mxDestroyArray(t_mx);mxDestroyArray(j_mx);mxDestroyArray(m_mx);
     mxDestroyArray(ft_mx);
 }
@@ -570,6 +519,7 @@ void solver::GaussThomasAlgo(std::vector<double> a, std::vector<double> b, std::
         solution[a.size()-2 - i] = dprime[a.size() - 2 - i] - cprime[a.size() - 2 -i]*solution[a.size()-1 - i];
     }
 }
+
 void solver::showContent(std::vector<double> vec){
     for(unsigned int i=0;i<vec.size();i++){
         std::cout << vec[i] << "/";

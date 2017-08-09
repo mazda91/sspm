@@ -18,14 +18,15 @@ int main() {
     solver *solveModel = new solver(ep);
     solveModel->setModel(usedModel);
 
-    while(true){
+    bool quit = false;
+    while(quit != true){
          std::cout << ">" ;
          getline(std::cin,line);
-         evaluate_command(line, &usedModel, &solveModel);
+         evaluate_command(line, &usedModel, &solveModel, quit);
+         
          solveModel->reInitialize();
          //solveModel->displayEquilibrum();
      }
-    engClose(ep);
     delete solveModel;
     return 0;
 }

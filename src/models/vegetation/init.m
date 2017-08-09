@@ -1,4 +1,4 @@
-function[lengthAtBirth,maximumLength,E0,u0]= init(m)
+function[lengthAtBirth,maximumLength,E0,u0,N0]= init(m)
     
     global nbCols; global phi; global rho; global hm; global s; global cext;
     global eta; global etac; global theta; global alpha1; global beta1;
@@ -31,4 +31,5 @@ function[lengthAtBirth,maximumLength,E0,u0]= init(m)
     
     %u0 = rand(nbCols,1);
     E0 = environment(m,u0,0,0,0);
+    N0 = 10*u0;
 end

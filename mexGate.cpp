@@ -6,43 +6,30 @@
 #include <string>
 #include "matrix.h"
 
-#define MAXCHAR 100000
 using namespace std;
 
-void mexGate(){
+solver* mexGate(){
     Engine *ep = engOpen("");
     engEvalString(ep,"nbLoops = 0;");
     solver *solveModel = new solver(ep);
     model *usedModel = new model();
     solveModel->setModel(usedModel);
 
-  //  ifstream myfile("src/command1.m",ios::in);         
-  //  char c;                                                                     
-  //  char content[MAXCHAR];                                                      
-  //  unsigned int i = 0;                                                         
-  //  if (myfile){                                                                
-  //      while (myfile.get(c)){                                                  
-  //         content[i] = c;                                                     
-  //         i += 1;                                                             
-  //      }                                                                       
-  //    myfile.close();                                                         
-  //  }    
-  //  //std::cout << content << std::endl;
-    while (true){
+    bool quit = false;
+    while (quit != true){
+         //call the m.file command1.m
          engEvalString(ep,"command1;");
+
+         //get the user-requested command and evaluate it
          mxArray *mxCommand = engGetVariable(ep,"command_line");
          char* command_line =  mxArrayToString(mxCommand);
          string str(command_line);
-         cout << command_line << std::endl;
-         evaluate_command(command_line, &usedModel, &solveModel);
-         solveModel->reInitialize();
-        //solveModel->displayEquilibrum();
+         evaluate_command(command_line, &usedModel, &solveModel, quit);
 
+         //destroy the created mxArray
          mxDestroyArray(mxCommand);
     }
- 
-    engClose(ep);
-    delete solveModel;
+    return solveModel;
 }
 
 
@@ -54,16 +41,32 @@ void mexFunction(int nlhs, mxArray* plhs[],int nrhs, const mxArray* prhs[]) {
     if(nrhs != 0) {
         mexErrMsgIdAndTxt("MATLAB:mexcpp:nargin","MEXCPP requires no input arguments.");
     }
-    if(nlhs != 0){
-        mexErrMsgIdAndTxt("MATLAB:mexcpp:nargin","MEXCPP requires no output argument.");
+    if(nlhs != 4){
+        mexErrMsgIdAndTxt("MATLAB:mexcpp:nargin","MEXCPP requires three output arguments : size mesh / density distribution / environment / cohorts(for EBT method)");
     }
-//
-//    /* Check if the input is of proper type */
-//    if(!mxIsChar(prhs[0])){
-//           mexErrMsgIdAndTxt("MATLAB:mexcpp:typeargin","Argument has to be a char array.");
-  //  }
-//
-     /* Acquire pointers to the input data */
-     mexGate();
+
+    //call the package and returns the solver instance
+    solver *solveModel = mexGate();
+
+    //create mxArrays matrices to pass as left-hand side (plhs)
+    mxArray *xmx = mxCreateDoubleMatrix(solveModel->J + 1,1,mxREAL);
+    mxArray *umx = mxCreateDoubleMatrix(solveModel->J + 1,1,mxREAL);
+   mxArray *Nmx = mxCreateDoubleMatrix(solveModel->J + 1,1,mxREAL);
+    mxArray *Emx = mxCreateDoubleMatrix(solveModel->E.size(),1,mxREAL);
+
+    //copy the final values of x, u and E (mesh, distribution density and environmental variable) into those mxArrays
+    for (unsigned int i=0; i<=solveModel->J; i++){
+        mxGetPr(xmx)[i] = solveModel->x[i];
+        mxGetPr(umx)[i] = solveModel->u[i];
+        mxGetPr(Nmx)[i] = solveModel->N[i];
+   }
+    for (unsigned int i=0; i<1;i++){
+        mxGetPr(Emx)[i] = solveModel->E[i];
+    }
+
+    plhs[0] = xmx; plhs[1] = umx; plhs[2] = Emx; plhs[3] = Nmx;
+
+    delete solveModel;
+
 }
 

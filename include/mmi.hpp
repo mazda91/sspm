@@ -35,6 +35,6 @@ void tokenize(const std::string &s, std::vector<std::string> &tokens);
  *  \param[in,out] solver    : pointer to a solver instance.
  *  \todo complete options 
  */ 
-void evaluate_command(std::string line, model **usedModel, solver **solveModel);
+void evaluate_command(std::string line, model **usedModel, solver **solveModel, bool &quit);
 
 #endif

@@ -23,24 +23,15 @@ class solver{
 private:
     model *usedModel;
     std::string usedMethod;
-    unsigned int J = 100;//default value for the number of size range intervals
-    unsigned int M = 100;//default value for the number of time range intervals
-    double Tf = 10.0; //  default value for the solver ending time 
-    double temporalRegularization = 1;
     std::vector<double> U;//vector of Ui's (average of the distribution we look for on each subdivsion interval)
-    std::vector<double> x;//sizeMesh  
-    std::vector<double> u;//approximation of the distribution ( our solution)
 
     Engine *ep;
-    std::vector<double> N;//vector of cohort abundances
     
-    /** \brief Partitiones the size range into N equidistant intervals */
+    /** \brief Partitiones the size range into J equidistant intervals */
     void setSizeMesh();
 
-    /** \brief Sets the distribution at interval boundaries with random values between 0 and 1 */
-    void setInitialDistribution();
-
-    void setInitialCohorts();
+    /** \brief Sets the density distribution and the cohorts at interval boundaries with values provided in init.m file */
+    void setInitialSolutions();
 
     /** \brief Computes the regularizing factor needed in the monitor function*/
     double regularizingFactor() const; 
@@ -54,7 +45,6 @@ private:
     /** \brief Computes the solution of a linear system using Gauss-Thomas algorithm*/
     void  GaussThomasAlgo(std::vector<double> a, std::vector<double> b, std::vector<double> c, std::vector<double> d,std::vector<double> & solution);
 
-    double totalAbundance();
     /** \brief Computes the distribution through time using mesh-upwind method.*/          
     void solve_MU(unsigned int move);    
     
@@ -65,14 +55,27 @@ private:
 
     void display(mxArray *abscissa,mxArray *ordinates, mxArray *time);
 
-    void compareMethods(std::vector<cohort> & fixedMesh, std::vector<double> & newX, std::vector<double> & u, std::vector<double> & abundance);
+     /** \brief Transforms the set of cohorts into a density function*/          
+    void cohortsToDensity(std::vector<cohort> & fixedMesh, std::vector<double> & newX, std::vector<double> & u, std::vector<double> & abundance);
 
 public:
-    
+    std::vector<double> x;//sizeMesh  
+    std::vector<double> u;//approximation of the distribution ( our solution)
+    std::vector<double> E;//environment 
+    std::vector<double> N;//vector of cohort abundances
+
+     unsigned int J = 100;//default value for the number of size range intervals
+    unsigned int M = 100;//default value for the number of time range intervals
+    double Tf = 10.0; //  default value for the solver ending time 
+    double temporalRegularization = 1;
+   
+
     solver(Engine *ep);
     ~solver();
     
+    /** \brief Sets the matlab engine */
     void setEngine(Engine *ep);
+
     /** \brief Sets the pointer to the model instance to deal with.  */
     void setModel(model *model);
 
