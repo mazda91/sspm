@@ -5,7 +5,7 @@ IFLAGS = -I /usr/local/MATLAB/new-R2017a/include
 WFLAGS= -Wall -Wextra 
 LDFLAGS= -g
 LIBS=  -L$(matlabroot)/bin/glnxa64  -leng -lmx -lmat  
-WLIBS = -L/usr/local/MATLAB/new-R2017a/win64/ -leng -lmx -lmat 
+WLIBS = -L/usr/local/MATLAB/new-R2017a/win64/ 
 matlabroot= /usr/local/MATLAB/R2017a
 SRCDIR = ./src
 OBJDIR = ./obj
@@ -27,7 +27,7 @@ all: exec
 exec : $(OBJLINFILES)
 	$(GXX) -g -o $(SSPM) $(OBJLINFILES)  -Wl,-rpath-link,$(matlabroot)/bin/glnxa64 -lstdc++  -lm  $(LIBS) 
 	mex  mexGate.cpp  -output $(SSPM).$(LINEXT) $(OBJLINFILES) $(LIBS) 
-	x86_64-w64-mingw32-g++ -std=c++11 -static-libgcc -static-libstdc++ -m64 -shared  -I /usr/local/MATLAB/R2017a/extern/include/  -DMATLAB_MEX_FILE -L/usr/x86_64-w64-mingw32/lib/ -L/usr/local/MATLAB/new-R2017a/win64 -o bin/main.mexw64 mexGate.cpp src/*.cpp -leng -lmx -lmex
+	x86_64-w64-mingw32-g++ -std=c++11 -static-libgcc -static-libstdc++ -m64 -shared  -I $(matlabroot)/extern/include/  -DMATLAB_MEX_FILE -L/usr/x86_64-w64-mingw32/lib/ -L$(WLIBS) -o bin/main.mexw64 mexGate.cpp src/*.cpp -leng -lmx -lmex
 
 
 $(OBJDIR)/$(LINDIR)/%.o :  $(SRCDIR)/%.cpp $(OBJDIR)  
