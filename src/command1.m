@@ -15,8 +15,8 @@ else
         command_line = ' -quit';
     end
 end
-while ( (strcmp(operation,'solve') == 0) && (strcmp(operation,'quit') == 0))
-    list = {'change the method','change a solver parameter','change a current model parameter', 'show a solver parameter','show a current model parameter', 'solve','quit'};
+while ( (strcmp(operation,'solve') == 0) && (strcmp(operation,'quit') == 0) && (strcmp(operation,'show a solver parameter') == 0))
+    list = {'change the method','change a solver parameter', 'show a solver parameter', 'solve','quit'};
     [command,v] = listdlg('PromptString','next operations','SelectionMode','single','ListString',list);
     operation = list{command};
     if (strcmp(operation,'change the method') == 1)
@@ -31,22 +31,11 @@ while ( (strcmp(operation,'solve') == 0) && (strcmp(operation,'quit') == 0))
         num_lines = 1
         answer = inputdlg(prompt,dlg_title,num_lines);
         solverPar = strcat(solverPar,' -csp',list{command},[' ',sprintf('%s',answer{1})]);
-    elseif (strcmp(operation,'change a current model parameter') == 1)
-        list = {' lengthAtBirth',' maximumLength'};
-        [command,v] = listdlg('PromptString','Select a parameter','SelectionMode','single','ListString',list);
-        prompt = {'Enter a value:'};
-        dlg_title = 'Input';
-        num_lines = 1
-        answer = inputdlg(prompt,dlg_title,num_lines);
-        modelPar = strcat(modelPar,' -cmp ',list{command},[' ',sprintf('%s',answer{1})]);
     elseif (strcmp(operation,'show a solver parameter') == 1)
         list = {' J',' M',' Tf',' tau'};
         [command,v] = listdlg('PromptString','Select a parameter','SelectionMode','single','ListString',list);
 	    solverPar = strcat(solverPar,' -ssp ',list{command});
-    elseif (strcmp(operation,'show a current model parameter') == 1)
-        list = {' lengthAtBirth',' maximumLength'};
-        [command,v] = listdlg('PromptString','Select a parameter','SelectionMode','single','ListString',list);
-        modelPar = strcat(modelPar,' -smp ',list{command});
+        nbLoops = nbLoops + 1;
     elseif (strcmp(operation,'quit') == 1)
 	    command_line = strcat(command_line,' -q');
     elseif (strcmp(operation,'solve') == 1)
